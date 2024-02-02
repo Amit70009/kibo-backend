@@ -16,7 +16,7 @@ async function Ticket(dataFromExternalSource) {
     );
 
     const externalData = await axios.get(
-      "https://desk.zoho.com/api/v1/tickets?limit=5&sortBy=-modifiedTime",
+      "https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-modifiedTime",
       {
         headers: {
           "Content-Type": "application/json",
