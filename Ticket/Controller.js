@@ -166,8 +166,8 @@ const dateString2 = ticket.createdTime.split('T')[0];
 async function GetAllData(data){
   try {
     const { start_date, end_date, ...otherParams } = data;
-    const startDate = moment(start_date).toDate();
-        const endDate = moment(end_date).toDate();
+    const startDate = start_date ? moment(start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
+    const endDate = end_date ? moment(end_date).toDate() : new Date();
         const ticketData = await TicketSchema.find({
           ...otherParams, // Include other query parameters
           created_at: { $gte: startDate, $lte: endDate }
