@@ -1,4 +1,5 @@
 const axios = require("axios");
+const moment = require('moment');
 const TicketSchema = require("../Ticket/Model.js").ticketModel;
 
 async function Ticket(dataFromExternalSource) {
@@ -164,7 +165,14 @@ const dateString2 = ticket.createdTime.split('T')[0];
 
 async function GetAllData(data){
   try {
-      var ticketData = await TicketSchema.find(data)
+    const { start_date, end_date, ...otherParams } = data;
+    const startDate = moment(start_date).toDate();
+        const endDate = moment(end_date).toDate();
+        const ticketData = await TicketSchema.find({
+          ...otherParams, // Include other query parameters
+          created_at: { $gte: startDate, $lte: endDate }
+      });
+      // var ticketData = await TicketSchema.find(data)
       if(ticketData){
           return{
               status: 200,
