@@ -162,10 +162,9 @@ const dateString2 = ticket.createdTime.split('T')[0];
   }
 }
 
-async function GetAllData(data, queryParams){
+async function GetAllData(data){
   try {
-      const filter = { ...queryParams };
-      var ticketData = await TicketSchema.find(filter)
+      var ticketData = await TicketSchema.find(data)
       if(ticketData){
           return{
               status: 200,
