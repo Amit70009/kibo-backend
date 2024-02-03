@@ -2,19 +2,39 @@ const axios = require("axios");
 const moment = require('moment');
 const TicketSchema = require("../Ticket/Model.js").ticketModel;
 
+let refreshTokenData = null;
+
+async function getRefreshToken() {
+  try {
+    // If refresh token data is not available or it's been more than 20 minutes since the last request
+    if (!refreshTokenData || moment().diff(refreshTokenData.timestamp, 'minutes') > 20) {
+      const response = await axios.post(
+        `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+        }
+      );
+      refreshTokenData = {
+        access_token: response.data.access_token,
+        timestamp: moment(), // Update the timestamp
+      };
+    }
+    return refreshTokenData.access_token;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    throw error;
+  }
+}
+
 async function Ticket(dataFromExternalSource) {
   try {
     const apiCallTime = new Date();
-    const refreshToken = await axios.post(
-      `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-      }
-    );
+   
+    const accessToken = await getRefreshToken();
 
     const externalData = await axios.get(
       "https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-createdTime",
@@ -22,7 +42,7 @@ async function Ticket(dataFromExternalSource) {
         headers: {
           "Content-Type": "application/json",
           accept: "application/json",
-          Authorization: `Bearer ${refreshToken.data.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -33,7 +53,7 @@ async function Ticket(dataFromExternalSource) {
         headers: {
           "Content-Type": "application/json",
           accept: "application/json",
-          Authorization: `Bearer ${refreshToken.data.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -57,7 +77,7 @@ async function Ticket(dataFromExternalSource) {
           headers: {
             "Content-Type": "application/json",
             accept: "application/json",
-            Authorization: `Bearer ${refreshToken.data.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -70,7 +90,7 @@ async function Ticket(dataFromExternalSource) {
           headers: {
             "Content-Type": "application/json",
             accept: "application/json",
-            Authorization: `Bearer ${refreshToken.data.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -212,24 +232,14 @@ async function GetAllData(data){
 
 async function AgentName() {
 try {
-  const refreshToken = await axios.post(
-    `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
-    {},
-    {
-      headers: {
-        "Content-Type": "application/json",
-        accept: "application/json",
-      },
-    }
-  );
-
+  const accessToken = await getRefreshToken(); // Get access token
   const agentsResponse = await axios.get(
     "https://desk.zoho.com/api/v1/agents?limit=200",
     {
       headers: {
         "Content-Type": "application/json",
         accept: "application/json",
-        Authorization: `Bearer ${refreshToken.data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     }
   );
@@ -249,41 +259,29 @@ try {
 }
 }
 
-async function AccountName() {
-try {
-  const refreshToken = await axios.post(
-    `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
-    {},
-    {
-      headers: {
-        "Content-Type": "application/json",
-        accept: "application/json",
-      },
-    }
-  );
-  
-  accountData = await axios.get(
-    `https://desk.zoho.com/api/v1/accounts?limit=100`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        accept: "application/json",
-        Authorization: `Bearer ${refreshToken.data.access_token}`,
-      },
-    }
-  );
+async function AccountName(accessToken) {
+  try {
+    const accessToken = await getRefreshToken(); // Get access token
+    const accountData = await axios.get(
+      `https://desk.zoho.com/api/v1/accounts?limit=100`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+          Authorization: `Bearer ${accessToken}`, // Use access token in the request header
+        },
+      }
+    );
 
-  if(accountData){
-    return{
-            status: 200,
-              message: "All Account Fetched Successfully",
-              data: accountData.data
-          }
+    return {
+      status: 200,
+      message: "All Account Fetched Successfully",
+      data: accountData.data,
+    };
+  } catch (error) {
+    console.error("Error fetching account data:", error);
+    throw error;
   }
-
-} catch (error) {
-  throw error
-}
 }
 
 module.exports = { Ticket, GetAllData, AccountName, AgentName};
