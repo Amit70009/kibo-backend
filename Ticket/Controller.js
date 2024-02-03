@@ -210,4 +210,80 @@ async function GetAllData(data){
   }
 }
 
-module.exports = { Ticket, GetAllData };
+async function AgentName() {
+try {
+  const refreshToken = await axios.post(
+    `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
+    {},
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    }
+  );
+
+  const agentsResponse = await axios.get(
+    "https://desk.zoho.com/api/v1/agents?limit=200",
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+        Authorization: `Bearer ${refreshToken.data.access_token}`,
+      },
+    }
+  );
+
+  const data = agentsResponse.data
+
+  if(agentsResponse){
+    return{
+        status: 200,
+        message: "All agent Fetched Successfully",
+        data: {data}
+    }
+}
+
+} catch (error) {
+  throw error
+}
+}
+
+async function AccountName() {
+try {
+  const refreshToken = await axios.post(
+    `https://accounts.zoho.com/oauth/v2/token?grant_type=refresh_token&client_id=${process.env.CLIENTID}&client_secret=${process.env.CLIENTSECRET}&refresh_token=${process.env.TOKEN}`,
+    {},
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    }
+  );
+  
+  accountData = await axios.get(
+    `https://desk.zoho.com/api/v1/accounts?limit=100`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+        Authorization: `Bearer ${refreshToken.data.access_token}`,
+      },
+    }
+  );
+
+  if(accountData){
+    return{
+            status: 200,
+              message: "All Account Fetched Successfully",
+              data: accountData.data
+          }
+  }
+
+} catch (error) {
+  throw error
+}
+}
+
+module.exports = { Ticket, GetAllData, AccountName, AgentName};

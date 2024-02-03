@@ -6,6 +6,8 @@ var dbconn = require("./database");
 var UserLogin = require("./Login Function/Routes");
 var RegisterUser = require("./Register Function/Routes")
 var Data = require("./Ticket/Routes")
+var AccountName = require("./AccoutName/accountName");
+var AgentName = require("./AgentName/agentName")
 var FetchData = require("./FetchData/fetch")
 app.use(cors({
     "Access-Control-Allow-Origin": "*",
@@ -36,6 +38,8 @@ app.use("/api/v1/users", UserLogin);
 app.use("/api/v1/users", RegisterUser);
 app.use("/api/v1/users", Data);
 app.use("/api/v1/users", FetchData);
+app.use("/api/v1/users", AccountName);
+app.use("/api/v1/users", AgentName);
 
 
 app.listen(Constant.portNo, async (error, conn) => {
