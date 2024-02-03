@@ -17,7 +17,7 @@ async function Ticket(dataFromExternalSource) {
     );
 
     const externalData = await axios.get(
-      "https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-modifiedTime",
+      "https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-createdTime",
       {
         headers: {
           "Content-Type": "application/json",
@@ -165,13 +165,37 @@ const dateString2 = ticket.createdTime.split('T')[0];
 
 async function GetAllData(data){
   try {
-    const { start_date, end_date, ...otherParams } = data;
+    const { start_date, end_date, ticket_owner, account_name, status, severity, ...otherParams } = data;
     const startDate = start_date ? moment(start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
     const endDate = end_date ? moment(end_date).toDate() : new Date();
-        const ticketData = await TicketSchema.find({
-          ...otherParams, // Include other query parameters
-          created_at: { $gte: startDate, $lte: endDate }
-      });
+
+
+    const query = {
+      ...otherParams, // Include other query parameters
+      last_modified: { $gte: startDate, $lte: endDate }
+    };
+
+    if (ticket_owner) {
+      const ticketOwners = ticket_owner.split(',').map(owner => owner.trim());
+      query.ticket_owner = { $in: ticketOwners }; 
+    }
+
+    if (account_name) {
+      const accountOwners = account_name.split(',').map(accountowner => accountowner.trim());
+      query.account_name = { $in: accountOwners }; 
+    }
+
+    if (status) {
+      const ticketStatus = status.split(',').map(stat => stat.trim());
+      query.status = { $in: ticketStatus }; 
+    }
+
+    if (severity) {
+      const ticketSeverity = severity.split(',').map(sev => sev.trim());
+      query.severity = { $in: ticketSeverity }; 
+    }
+
+        const ticketData = await TicketSchema.find(query);
       // var ticketData = await TicketSchema.find(data)
       if(ticketData){
           return{
