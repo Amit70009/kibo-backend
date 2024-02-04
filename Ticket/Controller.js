@@ -63,6 +63,7 @@ async function Ticket(dataFromExternalSource) {
       agentsMap[agent.id] = {
         firstName: agent.firstName,
         lastName: agent.lastName,
+        email: agent.emailId
       };
     });
 
@@ -95,7 +96,7 @@ async function Ticket(dataFromExternalSource) {
         }
       );
     } else {
-      console.log("specificData.data.accountId is null");
+     
       accountData = { data: { accountName: null } }; // Mock account data
     }
 
@@ -123,7 +124,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
       ticket_age = "11-30 days"
   } else if(difference >=31 && difference < 60) {
     ticket_age = "30-60 days"
-} else {
+} else if(difference >= 61) {
     ticket_age = "More than 60 days"
   }
 
@@ -131,18 +132,18 @@ const dateString2 = ticket.createdTime.split('T')[0];
         // Extracting account_name information
         const accountId = ticket.assigneeId;
         const agentInfo = agentsMap[accountId];
+        // console.log("Data", agentInfo);
         const ticket_owner = agentInfo
           ? `${agentInfo.firstName} ${agentInfo.lastName}`
           : "Unassigned";
+        const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
 
-         
-            
-        // Creating the new ticket
         return TicketSchema.create({
           ticket_id: ticket.id,
           ticket_url: ticket.webUrl,
           email: ticket.email,
           ticket_owner,
+          ticket_owner_email,
           account_name: accountData.data.accountName,
           status: ticket.status,
           created_at: ticket.createdTime,
@@ -152,10 +153,11 @@ const dateString2 = ticket.createdTime.split('T')[0];
           resolved_at: specificData.data.closedTime || null,
           ticket_age,
         });
-      } else {
+      } else {     
         existingTicket.last_update = apiCallTime;
         existingTicket.resolved_at = specificData.data.closedTime || null;
         existingTicket.ticket_owner;
+        existingTicket.ticket_owner_email;
         existingTicket.status = ticket.status;
         existingTicket.last_modified = specificData.data.modifiedTime;
         existingTicket.severity = specificData.data.customFields["Severity"];
@@ -185,7 +187,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
 
 async function GetAllData(data){
   try {
-    const { start_date, end_date, ticket_owner, account_name, status, severity, ...otherParams } = data;
+    const { start_date, end_date, ticket_owner_email, account_name, status, severity, ...otherParams } = data;
     const startDate = start_date ? moment(start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
     const endDate = end_date ? moment(end_date).toDate() : new Date();
 
@@ -195,8 +197,8 @@ async function GetAllData(data){
       last_modified: { $gte: startDate, $lte: endDate }
     };
 
-    if (ticket_owner) {
-      const ticketOwners = ticket_owner.split(',').map(owner => owner.trim());
+    if (ticket_owner_email) {
+      const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
       query.ticket_owner = { $in: ticketOwners }; 
     }
 
