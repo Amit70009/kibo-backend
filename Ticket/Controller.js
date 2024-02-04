@@ -199,7 +199,7 @@ async function GetAllData(data){
 
     if (ticket_owner_email) {
       const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
-      query.ticket_owner = { $in: ticketOwners }; 
+      query.ticket_owner_email = { $in: ticketOwners }; 
     }
 
     if (account_name) {
