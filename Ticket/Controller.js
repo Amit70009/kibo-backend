@@ -110,7 +110,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
     const date1 = new Date(dateString1);
     const date2 = new Date(dateString2);
 
-    const difference = (date1 - date2)/(1000 * 3600 * 24);
+    const difference = ((date1 - date2)/(1000 * 3600 * 24))+1;
 
     
     let ticket_age;
