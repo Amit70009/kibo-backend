@@ -69,7 +69,7 @@ async function Ticket(dataFromExternalSource) {
 
     const ticketDataPromises = externalData.data.data.map(async (ticket) => {
       const existingTicket = await TicketSchema.findOne({
-        ticket_id: ticket.id,
+        ticket_id: ticket.ticketNumber,
       });
 
       const specificData = await axios.get(
