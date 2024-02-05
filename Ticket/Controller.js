@@ -139,7 +139,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
         const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
 
         return TicketSchema.create({
-          ticket_id: ticket.id,
+          ticket_id: ticket.ticketNumber,
           ticket_url: ticket.webUrl,
           email: ticket.email,
           ticket_owner,
@@ -187,14 +187,16 @@ const dateString2 = ticket.createdTime.split('T')[0];
 
 async function GetAllData(data){
   try {
-    const { start_date, end_date, ticket_owner_email, account_name, status, severity, ...otherParams } = data;
+    const { start_date, end_date, ticket_owner_email, account_name, status, severity, created_start_date, created_end_date, ...otherParams } = data;
     const startDate = start_date ? moment(start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
     const endDate = end_date ? moment(end_date).toDate() : new Date();
-
+    const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
+    const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
 
     const query = {
       ...otherParams, // Include other query parameters
-      last_modified: { $gte: startDate, $lte: endDate }
+      last_modified: { $gte: startDate, $lte: endDate },
+      created_at: { $gte: createdStartDate, $lte: createdEndDate }
     };
 
     if (ticket_owner_email) {
