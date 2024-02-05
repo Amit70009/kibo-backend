@@ -8,7 +8,12 @@ var RegisterUser = require("./Register Function/Routes")
 var Data = require("./Ticket/Routes")
 var AccountName = require("./AccoutName/accountName");
 var AgentName = require("./AgentName/agentName")
+var AgentData = require("./Agent Details/Route")
+var AccountData = require("./AccountDetails/Route")
+var FetchAgent = require('./Agent Details/FetchAgent')
+var FetchAccount = require('./AccountDetails/FetchAccount')
 var FetchData = require("./FetchData/fetch")
+var Token = require("./Login Function/tokengenerate")
 app.use(cors({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE",
@@ -40,7 +45,10 @@ app.use("/api/v1/users", Data);
 app.use("/api/v1/users", FetchData);
 app.use("/api/v1/users", AccountName);
 app.use("/api/v1/users", AgentName);
-
+app.use("/api/v1/users", AgentData);
+app.use("/api/v1/users", AccountData)
+app.use("/api/v1/users", FetchAgent)
+app.use("/api/v1/users", FetchAccount)
 
 app.listen(Constant.portNo, async (error, conn) => {
     if(error){

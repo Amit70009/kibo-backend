@@ -84,6 +84,19 @@ async function Ticket(dataFromExternalSource) {
       );
 
       let accountData;
+
+      if(specificData.data.departmentId) {
+        departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    } 
+
       if (specificData.data.accountId) {
       accountData = await axios.get(
         `https://desk.zoho.com/api/v1/accounts/${specificData.data.accountId}`,
@@ -123,9 +136,11 @@ const dateString2 = ticket.createdTime.split('T')[0];
     } else if(difference >=11 && difference < 30) {
       ticket_age = "11-30 days"
   } else if(difference >=31 && difference < 60) {
-    ticket_age = "30-60 days"
-} else if(difference >= 61) {
-    ticket_age = "More than 60 days"
+    ticket_age = "31-60 days"
+} else if(difference >= 61 && difference < 90) {
+    ticket_age = "61-90 days"
+  } else if (difference >= 91) {
+    ticket_age = "More than 90 days"
   }
 
       if (!existingTicket) {
@@ -141,6 +156,8 @@ const dateString2 = ticket.createdTime.split('T')[0];
         return TicketSchema.create({
           ticket_id: ticket.ticketNumber,
           ticket_url: ticket.webUrl,
+          ticket_subject: ticket.subject,
+          department: departmentId.data.name,
           email: ticket.email,
           ticket_owner,
           ticket_owner_email,
@@ -156,9 +173,11 @@ const dateString2 = ticket.createdTime.split('T')[0];
       } else {     
         existingTicket.last_update = apiCallTime;
         existingTicket.resolved_at = specificData.data.closedTime || null;
-        existingTicket.ticket_owner;
-        existingTicket.ticket_owner_email;
+        existingTicket.ticket_owner = ticket_owner;
+        existingTicket.department = departmentId.data.name;
+        existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.status = ticket.status;
+        existingTicket.ticket_subject = ticket.subject;
         existingTicket.last_modified = specificData.data.modifiedTime;
         existingTicket.severity = specificData.data.customFields["Severity"];
         existingTicket.account_name = accountData.data.accountName;

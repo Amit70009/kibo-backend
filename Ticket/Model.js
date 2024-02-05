@@ -4,6 +4,8 @@ var mongoose = require("mongoose");
 var ticketSchema = new mongoose.Schema({
 ticket_id: {type: String},
 ticket_url: {type: String},
+ticket_subject: {type: String},
+department: {type: String},
 email: {type: String},
 ticket_owner: {type: String},
 ticket_owner_email: {type: String},
