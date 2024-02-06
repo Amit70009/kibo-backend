@@ -171,6 +171,14 @@ const dateString2 = ticket.createdTime.split('T')[0];
           ticket_age,
         });
       } else {     
+        const accountId = ticket.assigneeId;
+        const agentInfo = agentsMap[accountId];
+        // console.log("Data", agentInfo);
+        const ticket_owner = agentInfo
+          ? `${agentInfo.firstName} ${agentInfo.lastName}`
+          : "Unassigned";
+        const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
+
         existingTicket.last_update = apiCallTime;
         existingTicket.resolved_at = specificData.data.closedTime || null;
         existingTicket.ticket_owner = ticket_owner;
