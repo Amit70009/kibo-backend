@@ -37,7 +37,7 @@ async function Ticket(dataFromExternalSource) {
     const accessToken = await getRefreshToken();
 
     const externalData = await axios.get(
-      "https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-createdTime",
+      "https://desk.zoho.com/api/v1/tickets?limit=1&sortBy=-createdTime",
       {
         headers: {
           "Content-Type": "application/json",
@@ -83,6 +83,19 @@ async function Ticket(dataFromExternalSource) {
         }
       );
 
+      const ticketMetrics = await axios.get(
+        `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+      
+      console.log(ticketMetrics.data);
+
       let accountData;
 
       if(specificData.data.departmentId) {
@@ -126,21 +139,21 @@ const dateString2 = ticket.createdTime.split('T')[0];
     const difference = ((date1 - date2)/(1000 * 3600 * 24))+1;
 
     
-    let ticket_age;
+    let age_bucket;
 
     // Categorize ticket age into different ranges
     if (difference >= 1 && difference < 3) {
-        ticket_age = "1-3 days";
+      age_bucket = "1-3 days";
     } else if(difference >=4 && difference < 10) {
-        ticket_age = "4-10 days"
+      age_bucket = "4-10 days"
     } else if(difference >=11 && difference < 30) {
-      ticket_age = "11-30 days"
+      age_bucket = "11-30 days"
   } else if(difference >=31 && difference < 60) {
-    ticket_age = "31-60 days"
+    age_bucket = "31-60 days"
 } else if(difference >= 61 && difference < 90) {
-    ticket_age = "61-90 days"
+  age_bucket = "61-90 days"
   } else if (difference >= 91) {
-    ticket_age = "More than 90 days"
+    age_bucket = "More than 90 days"
   }
 
       if (!existingTicket) {
@@ -168,7 +181,8 @@ const dateString2 = ticket.createdTime.split('T')[0];
           severity: specificData.data.customFields["Severity"],
           last_update: apiCallTime,
           resolved_at: specificData.data.closedTime || null,
-          ticket_age,
+          ticket_age: difference,
+          age_bucket: age_bucket,
         });
       } else {     
         const accountId = ticket.assigneeId;
@@ -189,7 +203,8 @@ const dateString2 = ticket.createdTime.split('T')[0];
         existingTicket.last_modified = specificData.data.modifiedTime;
         existingTicket.severity = specificData.data.customFields["Severity"];
         existingTicket.account_name = accountData.data.accountName;
-        existingTicket.ticket_age = ticket_age;
+        existingTicket.age_bucket = age_bucket;
+        existingTicket.ticket_age = difference;
         await existingTicket.save(); // Save the updated ticket
         return existingTicket;
       }
@@ -229,6 +244,11 @@ async function GetAllData(data){
     if (ticket_owner_email) {
       const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
       query.ticket_owner_email = { $in: ticketOwners }; 
+    }
+
+    if (department) {
+      const departments = department.split(',').map(dep => dep.trim());
+      query.department = { $in: department }; 
     }
 
     if (account_name) {

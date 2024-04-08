@@ -17,7 +17,8 @@ resolution: {type: String},
 severity: {type: String},
 last_update: {type: Date},
 resolved_at: {type: Date},
-ticket_age: {type: String}
+ticket_age: {type: String},
+age_bucket: {type: String}
 });
 var ticketModel = mongoose.model("ticket", ticketSchema);
 
