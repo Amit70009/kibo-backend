@@ -13,7 +13,7 @@ userRouter.post("/ticket-create", async (req, res) => {
     })
 })
 
-cron.schedule("*/30 * * * *", async () => {
+cron.schedule("*/20 * * * *", async () => {
     try {
       var callLoginMethod = await UserController.Ticket();
     } catch (error) {
