@@ -35,9 +35,8 @@ async function Ticket(dataFromExternalSource) {
     const apiCallTime = new Date();
    
     const accessToken = await getRefreshToken();
-
     const externalData = await axios.get(
-      "https://desk.zoho.com/api/v1/tickets?limit=1&sortBy=-createdTime",
+      `https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-modifiedTime`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -72,6 +71,8 @@ async function Ticket(dataFromExternalSource) {
         ticket_id: ticket.ticketNumber,
       });
 
+      // console.log(existingTicket.ticket_id);
+
       const specificData = await axios.get(
         `https://desk.zoho.com/api/v1/tickets/${ticket.id}`,
         {
@@ -94,7 +95,7 @@ async function Ticket(dataFromExternalSource) {
         }
       )
       
-      console.log(ticketMetrics.data);
+      // console.log(ticketMetrics.data);
 
       let accountData;
 
