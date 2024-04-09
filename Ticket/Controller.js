@@ -84,16 +84,16 @@ async function Ticket(dataFromExternalSource) {
         }
       );
 
-      const ticketMetrics = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
+      // const ticketMetrics = await axios.get(
+      //   `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       accept: "application/json",
+      //       Authorization: `Bearer ${accessToken}`,
+      //     },
+      //   }
+      // )
       
       // console.log(ticketMetrics.data);
 
@@ -178,6 +178,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
           account_name: accountData.data.accountName,
           status: ticket.status,
           created_at: ticket.createdTime,
+          resolution: specificData.data.resolution,
           last_modified: specificData.data.modifiedTime,
           severity: specificData.data.customFields["Severity"],
           last_update: apiCallTime,
@@ -201,6 +202,7 @@ const dateString2 = ticket.createdTime.split('T')[0];
         existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.status = ticket.status;
         existingTicket.ticket_subject = ticket.subject;
+        existingTicket.resolution = specificData.data.resolution;
         existingTicket.last_modified = specificData.data.modifiedTime;
         existingTicket.severity = specificData.data.customFields["Severity"];
         existingTicket.account_name = accountData.data.accountName;
