@@ -35,8 +35,9 @@ async function Ticket(dataFromExternalSource) {
     const apiCallTime = new Date();
    
     const accessToken = await getRefreshToken();
+
     const externalData = await axios.get(
-      `https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-modifiedTime`,
+      `https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=createdTime`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ async function Ticket(dataFromExternalSource) {
         },
       }
     );
-
+  
     const agentsResponse = await axios.get(
       "https://desk.zoho.com/api/v1/agents?limit=200",
       {
@@ -66,7 +67,7 @@ async function Ticket(dataFromExternalSource) {
       };
     });
 
-    const ticketDataPromises = externalData.data.data.map(async (ticket) => {
+    const ticketDataPromises = externalData.data.data?.map(async (ticket) => {
       const existingTicket = await TicketSchema.findOne({
         ticket_id: ticket.ticketNumber,
       });
@@ -143,15 +144,15 @@ const dateString2 = ticket.createdTime.split('T')[0];
     let age_bucket;
 
     // Categorize ticket age into different ranges
-    if (difference >= 1 && difference < 3) {
+    if (difference >= 1 && difference <= 3) {
       age_bucket = "1-3 days";
-    } else if(difference >=4 && difference < 10) {
+    } else if(difference >=4 && difference <= 10) {
       age_bucket = "4-10 days"
-    } else if(difference >=11 && difference < 30) {
+    } else if(difference >=11 && difference <= 30) {
       age_bucket = "11-30 days"
-  } else if(difference >=31 && difference < 60) {
+  } else if(difference >=31 && difference <= 60) {
     age_bucket = "31-60 days"
-} else if(difference >= 61 && difference < 90) {
+} else if(difference >= 61 && difference <= 90) {
   age_bucket = "61-90 days"
   } else if (difference >= 91) {
     age_bucket = "More than 90 days"
@@ -233,9 +234,9 @@ const dateString2 = ticket.createdTime.split('T')[0];
 async function GetAllData(data){
   try {
     const { start_date, end_date, ticket_owner_email, account_name, status, severity, created_start_date, created_end_date, department, ...otherParams } = data;
-    const startDate = start_date ? moment(start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
+    const startDate = start_date ? moment(start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
     const endDate = end_date ? moment(end_date).toDate() : new Date();
-    const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2024-01-01T00:00:00.000Z");
+    const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
     const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
 
     const query = {
