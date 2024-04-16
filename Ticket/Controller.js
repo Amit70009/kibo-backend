@@ -37,7 +37,7 @@ async function Ticket(dataFromExternalSource) {
     const accessToken = await getRefreshToken();
 
     const externalData = await axios.get(
-      `https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=createdTime`,
+      `https://desk.zoho.com/api/v1/tickets?limit=100&sortBy=-modifiedTime`,
       {
         headers: {
           "Content-Type": "application/json",
