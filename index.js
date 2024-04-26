@@ -12,8 +12,10 @@ var AgentData = require("./Agent Details/Route")
 var AccountData = require("./AccountDetails/Route")
 var FetchAgent = require('./Agent Details/FetchAgent')
 var FetchAccount = require('./AccountDetails/FetchAccount')
+var ArchievedTicket = require('./Archieved Ticket/Routes')
 var FetchData = require("./FetchData/fetch")
 var Token = require("./Login Function/tokengenerate")
+var createArchTicket = require("./Archieved Ticket/CreateRoute")
 app.use(cors({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE",
@@ -49,6 +51,8 @@ app.use("/api/v1/users", AgentData);
 app.use("/api/v1/users", AccountData)
 app.use("/api/v1/users", FetchAgent)
 app.use("/api/v1/users", FetchAccount)
+app.use("/api/v1/users", ArchievedTicket)
+app.use("/api/v1/users", createArchTicket)
 
 app.listen(Constant.portNo, async (error, conn) => {
     if(error){

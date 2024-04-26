@@ -1,6 +1,6 @@
 const axios = require("axios");
 const moment = require('moment');
-const TicketSchema = require("../Ticket/Model.js").ticketModel;
+const TicketSchema = require("../Ticket/Model").ticketModel;
 
 let refreshTokenData = null;
 
@@ -29,7 +29,65 @@ async function getRefreshToken() {
   }
 }
 
-async function Ticket(dataFromExternalSource) {
+async function archivedTickets(dataFromExternalSource) {
+  try {
+    const apiCallTime = new Date();
+    const departmentIds = [
+        "832118000000006907",
+        "832118000016851245",
+        "832118000022988053",
+        "832118000025206039",
+        "832118000027338037",
+        "832118000027344117",
+        "832118000034713312",
+      ];
+    const accessToken = await getRefreshToken();
+    const batchSize = 100
+    const allData = [];
+
+    for (const departmentId of departmentIds) {
+     
+      let hasMoreData = true;
+      range = 1;
+      while(hasMoreData) {
+        const archTicketResponse = await axios.get(
+          `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=${range}&limit=${batchSize}&departmentId=${departmentId}&viewType=1`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (archTicketResponse && archTicketResponse.data && archTicketResponse.data.data && archTicketResponse.data.data.length > 0) {
+            allData.push(...archTicketResponse.data.data);
+            range += batchSize; 
+        }
+        else{
+          hasMoreData = false;
+        }
+      }
+      }
+
+      const ticketDataPromises = allData?.map(async (ticket) => {
+        const existingTicket = await TicketSchema.findOne({
+          ticket_id: ticket.ticketNumber,
+        });
+
+        if (existingTicket) {
+          existingTicket.is_ticket_archieved = true; // Update the field value
+          return existingTicket.save(); // Save the updated ticket
+        }
+       
+      })
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+async function createArchTicket(dataFromExternalSource) {
   try {
     const apiCallTime = new Date();
    
@@ -38,7 +96,7 @@ async function Ticket(dataFromExternalSource) {
     const allData = [];
   
       const externalData = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets?limit=20&sortBy=-modifiedTime`,
+        `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=1&limit=100&departmentId=832118000027344117&viewType=1`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -149,7 +207,7 @@ async function Ticket(dataFromExternalSource) {
     const lastDepartmentDifference = ((date1 - date3)/(1000 * 3600 * 24))+1;
     const lastTicketTouched = specificData.data.closedTime ? "Already Closed" : ((date5 - date4)/(1000 * 3600 * 24))+1;
 
-    
+
     let age_bucket;
 
     if (difference >= 1 && difference <= 3) {
@@ -265,118 +323,4 @@ async function Ticket(dataFromExternalSource) {
   }
 }
 
-async function GetAllData(data){
-  try {
-    const { start_date, end_date, ticket_owner_email, account_name, status, severity, created_start_date, created_end_date, department, is_ticket_archieved, ...otherParams } = data;
-    const startDate = start_date ? moment(start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-    const endDate = end_date ? moment(end_date).toDate() : new Date();
-    const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-    const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
-
-    const query = {
-      ...otherParams, // Include other query parameters
-      last_modified: { $gte: startDate, $lte: endDate },
-      created_at: { $gte: createdStartDate, $lte: createdEndDate }
-    };
-
-    if (ticket_owner_email) {
-      const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
-      query.ticket_owner_email = { $in: ticketOwners }; 
-    }
-
-    if (department) {
-      const departments = department.split(',').map(dep => dep.trim());
-      query.department = { $in: department }; 
-    }
-
-    if (account_name) {
-      const accountOwners = account_name.split(',').map(accountowner => accountowner.trim());
-      query.account_name = { $in: accountOwners }; 
-    }
-
-    if (status) {
-      const ticketStatus = status.split(',').map(stat => stat.trim());
-      query.status = { $in: ticketStatus }; 
-    }
-
-    if (severity) {
-      const ticketSeverity = severity.split(',').map(sev => sev.trim());
-      query.severity = { $in: ticketSeverity }; 
-    }
-
-    if (is_ticket_archieved === 'all') {
-      // No filter on is_ticket_archeived
-    } else if (is_ticket_archieved !== undefined) {
-      query.is_ticket_archieved = is_ticket_archieved; // Include is_ticket_archeived filter if it's provided and not 'all'
-    }
-
-        const ticketData = await TicketSchema.find(query);
-      // var ticketData = await TicketSchema.find(data)
-      if(ticketData){
-          return{
-              status: 200,
-              message: "All data Fetched Successfully",
-              data: {ticketData}
-          }
-      }
-  } catch (error) {
-      console.log(error);
-      throw error
-  }
-}
-
-async function AgentName() {
-try {
-  const accessToken = await getRefreshToken(); // Get access token
-  const agentsResponse = await axios.get(
-    "https://desk.zoho.com/api/v1/agents?limit=200",
-    {
-      headers: {
-        "Content-Type": "application/json",
-        accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  const data = agentsResponse.data
-
-  if(agentsResponse){
-    return{
-        status: 200,
-        message: "All agent Fetched Successfully",
-        data: {data}
-    }
-}
-
-} catch (error) {
-  throw error
-}
-}
-
-async function AccountName(accessToken) {
-  try {
-    const accessToken = await getRefreshToken(); // Get access token
-    const accountData = await axios.get(
-      `https://desk.zoho.com/api/v1/accounts?limit=100`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-          Authorization: `Bearer ${accessToken}`, // Use access token in the request header
-        },
-      }
-    );
-
-    return {
-      status: 200,
-      message: "All Account Fetched Successfully",
-      data: accountData.data,
-    };
-  } catch (error) {
-    console.error("Error fetching account data:", error);
-    throw error;
-  }
-}
-
-module.exports = {Ticket, GetAllData, AccountName, AgentName};
+module.exports = {archivedTickets, createArchTicket};
