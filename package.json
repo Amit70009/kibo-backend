@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "max-time": "60 seconds"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
