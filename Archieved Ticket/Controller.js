@@ -38,7 +38,6 @@ async function archivedTickets(dataFromExternalSource) {
         "832118000022988053",
         "832118000025206039",
         "832118000027338037",
-        "832118000027344117",
         "832118000034713312",
       ];
     const accessToken = await getRefreshToken();
