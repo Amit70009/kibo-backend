@@ -69,8 +69,6 @@ async function archivedTickets(dataFromExternalSource) {
       }
       }
 
-      console.log("Data", allData.length);
-
       const ticketDataPromises = allData?.map(async (ticket) => {
         const existingTicket = await TicketSchema.findOne({
           ticket_id: ticket.ticketNumber,
