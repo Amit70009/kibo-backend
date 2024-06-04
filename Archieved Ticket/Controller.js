@@ -38,7 +38,6 @@ async function archivedTickets(dataFromExternalSource) {
         "832118000022988053",
         "832118000025206039",
         "832118000027338037",
-        "832118000027344117",
         "832118000034713312",
       ];
     const accessToken = await getRefreshToken();
@@ -164,17 +163,17 @@ async function createArchTicket(dataFromExternalSource) {
 
       let accountData;
 
-      if(specificData.data.departmentId) {
-        departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-    } 
+    //   if(specificData.data.departmentId) {
+    //     departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
+    //     {
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         accept: "application/json",
+    //         Authorization: `Bearer ${accessToken}`,
+    //       },
+    //     }
+    //   );
+    // } 
 
       if (specificData.data.accountId) {
       accountData = await axios.get(
@@ -257,7 +256,7 @@ async function createArchTicket(dataFromExternalSource) {
           ticket_id: ticket.ticketNumber,
           ticket_url: ticket.webUrl,
           ticket_subject: ticket.subject,
-          department: departmentId.data.name,
+          department: specificData.data.layoutDetails.layoutName,
           email: ticket.email,
           ticket_owner,
           ticket_owner_email,

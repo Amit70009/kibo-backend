@@ -33,12 +33,14 @@ async function Ticket(dataFromExternalSource) {
   try {
     const apiCallTime = new Date();
    
-    const accessToken = await getRefreshToken();
+    const accessToken = "1000.25c5af77f9a3b82f264704c40d346221.8d62d4ba933aba919ed5a29c3cf9ff43"
+// console.log(accessToken);
+   
     const batchSize = 20
     const allData = [];
   
       const externalData = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets?limit=20&sortBy=-modifiedTime`,
+        `https://desk.zoho.com/api/v1/tickets?from=101&limit=100&sortBy=-modifiedTime`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -48,7 +50,6 @@ async function Ticket(dataFromExternalSource) {
         }
       );
       allData.push(...externalData.data.data);
-  
    
     const agentsResponse = await axios.get(
       "https://desk.zoho.com/api/v1/agents?limit=200",
@@ -87,7 +88,6 @@ async function Ticket(dataFromExternalSource) {
           },
         }
       );
-
       // const ticketMetrics = await axios.get(
       //   `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
       //   {
@@ -103,17 +103,17 @@ async function Ticket(dataFromExternalSource) {
 
       let accountData;
 
-      if(specificData.data.departmentId) {
-        departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-    } 
+    //   if(specificData.data.departmentId) {
+    //     departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
+    //     {
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         accept: "application/json",
+    //         Authorization: `Bearer ${accessToken}`,
+    //       },
+    //     }
+    //   );
+    // } 
 
       if (specificData.data.accountId) {
       accountData = await axios.get(
@@ -196,7 +196,7 @@ async function Ticket(dataFromExternalSource) {
           ticket_id: ticket.ticketNumber,
           ticket_url: ticket.webUrl,
           ticket_subject: ticket.subject,
-          department: departmentId.data.name,
+          department: specificData.data.layoutDetails.layoutName,
           email: ticket.email,
           ticket_owner,
           ticket_owner_email,
@@ -228,7 +228,7 @@ async function Ticket(dataFromExternalSource) {
         existingTicket.last_update = apiCallTime;
         existingTicket.resolved_at = specificData.data.closedTime || null;
         existingTicket.ticket_owner = ticket_owner;
-        existingTicket.department = departmentId.data.name;
+        existingTicket.department = specificData.data.layoutDetails.layoutName;
         existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.last_touched = lastTicketTouched;
         existingTicket.status = ticket.status;
