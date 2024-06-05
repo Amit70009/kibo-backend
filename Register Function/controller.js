@@ -7,12 +7,12 @@ var CommonFunc = require("../commonfunction");
 async function userRegister(data){
     try {
         var checkUserData = await UserSchema.find({
-            $or: [{email: data.email}, {mobile: data.mobile}]
+        email: data.email
         });
         if(checkUserData.length){
             return {
                 status: 201,
-                message: "User already registered with this email or mobile",
+                message: "User already registered with this email",
                 data: {}
             }
         }

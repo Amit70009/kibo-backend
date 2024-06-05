@@ -5,7 +5,7 @@ var userSchema = new mongoose.Schema({
     full_name: { type: String, required: true },
     email: { type: String, require: true },
     password: { type: String },
-    role: {type: String, default:"Shopper"},
+    role: {type: String, default:"User"},
     acc_token: {type: String},
     isUserActive: { type: Boolean },
     profileImage: {data: Buffer, contentType: String,},

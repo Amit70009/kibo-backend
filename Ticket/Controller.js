@@ -13,7 +13,7 @@ async function getRefreshToken() {
         {
           headers: {
             "Content-Type": "application/json",
-            accept: "application/json",
+            accept: "application/json"
           },
         }
       );
@@ -33,14 +33,14 @@ async function Ticket(dataFromExternalSource) {
   try {
     const apiCallTime = new Date();
    
-    const accessToken = "1000.25c5af77f9a3b82f264704c40d346221.8d62d4ba933aba919ed5a29c3cf9ff43"
+    const accessToken = "1000.b6bb6c9973e309fcf6057df9c89fa2e4.2a919e96d711c9cea2fa8263ff1276a4"
 // console.log(accessToken);
    
     const batchSize = 20
     const allData = [];
   
       const externalData = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets?from=101&limit=100&sortBy=-modifiedTime`,
+        `https://desk.zoho.com/api/v1/tickets?from=1301&limit=100&sortBy=-modifiedTime`,
         {
           headers: {
             "Content-Type": "application/json",
