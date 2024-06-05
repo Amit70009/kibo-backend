@@ -21,7 +21,6 @@ async function userRegister(data){
             full_name: data.full_name,
             email: data.email,
             role: data.role,
-            mobile: data.mobile,
             gender: data.gender,
             password: encryptPass,
             createdOn: new Date(),
