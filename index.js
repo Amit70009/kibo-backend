@@ -66,4 +66,4 @@ app.listen(Constant.portNo, async (error, conn) => {
   console.log(`Server has been started on port no : ${Constant.portNo}`);
 });
 
-module.exports.handler=serverless(app)
+module.exports = app;
