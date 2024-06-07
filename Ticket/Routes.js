@@ -9,16 +9,9 @@ userRouter.post("/ticket-create", async (req, res) => {
     res.send({
         status: callLoginMethod.status,
         message: callLoginMethod.message,
-        data: callLoginMethod.data
+        // data: callLoginMethod.data
     })
 })
 
-cron.schedule("*/30 * * * *", async () => {
-    try {
-      var callLoginMethod = await UserController.Ticket();
-    } catch (error) {
-      console.error("Error executing scheduled task:", error);
-    }
-  });
 
 module.exports = userRouter
