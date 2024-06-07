@@ -65,4 +65,22 @@ try {
 }
 };
 
-module.exports = { userRegister, UpdateUser }
+async function fetchUser(userEmail) {
+  
+    try {
+        var fetch = await UserSchema.findOne({
+            email: userEmail
+        })
+        if(fetch){
+            return {
+                status: 200,
+                message: "User Fetched Successfully",
+              };
+        }
+    } catch (error) {
+        console.log(error);
+        throw error
+    }
+}
+
+module.exports = { userRegister, UpdateUser, fetchUser }
