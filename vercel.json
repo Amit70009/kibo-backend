@@ -11,9 +11,5 @@
             "src": "/(.*)",
             "dest": "/"
         }
-    ],
-    "crons": [{
-        "path": "/api/v1/users/ticket-create",
-        "schedule": "11 * * * *"
-      }]
+    ]
 }
