@@ -41,4 +41,28 @@ async function userRegister(data){
     }
 };
 
-module.exports = { userRegister }
+async function UpdateUser (userEmail, allParams, data) {
+    let encryptPass = await CommonFunc.encryptPassword(allParams.password);
+try {
+    var checkUser = await UserSchema.findOneAndUpdate({
+        email: userEmail
+        },
+    {
+        $set:{
+            password: encryptPass
+        }
+    });
+
+    if (checkUser) {
+        return {
+          status: 200,
+          message: "Password Updated Successfully",
+        };
+      }
+} catch (error) {
+    console.log(error);
+    throw error
+}
+};
+
+module.exports = { userRegister, UpdateUser }

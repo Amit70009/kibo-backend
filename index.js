@@ -14,6 +14,7 @@ var FetchAgent = require('./Agent Details/FetchAgent');
 var FetchAccount = require('./AccountDetails/FetchAccount');
 var ArchievedTicket = require('./Archieved Ticket/Routes');
 var FetchData = require("./FetchData/fetch");
+var UpdatePassword = require("./Update Function/Route")
 var Token = require("./Login Function/tokengenerate");
 var createArchTicket = require("./Archieved Ticket/CreateRoute");
 var serverless = require("serverless-http")
@@ -56,6 +57,7 @@ app.use("/api/v1/users", FetchAgent);
 app.use("/api/v1/users", FetchAccount);
 app.use("/api/v1/users", ArchievedTicket);
 app.use("/api/v1/users", createArchTicket);
+app.use("/api/v1/users", UpdatePassword)
 
 
 app.listen(Constant.portNo, async (error, conn) => {
