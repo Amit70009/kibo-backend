@@ -14,12 +14,4 @@ userRouter.post("/archieved-ticket", async (req, res) => {
     })
 })
 
-cron.schedule("*/30 * * * *", async () => {
-    try {
-      var callLoginMethod = await UserController.archivedTickets();
-    } catch (error) {
-      console.error("Error executing scheduled task:", error);
-    }
-  });
-
 module.exports = userRouter

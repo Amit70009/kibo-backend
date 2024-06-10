@@ -13,6 +13,7 @@ var AccountData = require("./AccountDetails/Route");
 var FetchAgent = require('./Agent Details/FetchAgent');
 var FetchAccount = require('./AccountDetails/FetchAccount');
 var ArchievedTicket = require('./Archieved Ticket/Routes');
+var SendEmail = require("./Email Data/sendEmail");
 var FetchData = require("./FetchData/fetch");
 var fetchUser = require("./Fetch Function/fetchUser")
 var UpdatePassword = require("./Update Function/Route")
@@ -60,6 +61,7 @@ app.use("/api/v1/users", ArchievedTicket);
 app.use("/api/v1/users", createArchTicket);
 app.use("/api/v1/users", UpdatePassword);
 app.use("/api/v1/users", fetchUser)
+app.use("/api/v1/users", SendEmail)
 
 
 app.listen(Constant.portNo, async (error, conn) => {
