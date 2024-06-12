@@ -12,6 +12,7 @@ async function userLogin(data){
         if(matchUser){
     
         let decryptPass = await CommonFunc.decryptPassword(data.password, matchUser.password);
+        console.log(decryptPass);
         if(decryptPass == false){
             return {
                 status: 202,

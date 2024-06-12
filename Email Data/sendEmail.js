@@ -1,25 +1,17 @@
 const express = require('express');
 const axios = require('axios');
+const otpGenerator = require('otp-generator')
+var UserSchema = require("../Login Function/Model").usermodel;
 const crypto = require('crypto');
 const userRouter = express();
+var CommonFunc = require("../commonfunction");
 userRouter.use(express.json());
-
-const algorithm = 'aes-256-cbc'; // Encryption algorithm
-const secretKey = crypto.randomBytes(32); // Encryption key (should be 32 bytes for aes-256)
-const iv = crypto.randomBytes(16); // Initialization vector
-
-// Function to encrypt OTP
-const encrypt = (text) => {
-  const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return `${iv.toString('hex')}:${encrypted}`;
-};
 
 userRouter.post('/send-email', async (req, res) => {
   const email = req.body.email;
-  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
-  const encryptedOtp = encrypt(otp); // Encrypt the OTP
+  const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false }); // Encrypt the OTP
+  let encryptOTP = await CommonFunc.encryptPassword(otp);
+  
 
   const data = JSON.stringify({
     sender: {
@@ -33,7 +25,7 @@ userRouter.post('/send-email', async (req, res) => {
       },
     ],
     subject: "Password Reset - Kibo Tool",
-    htmlContent: `${otp} is the one time password to reset your password. This one time password will be valid for next 10 minutes.`,
+    htmlContent: `${otp} is the one time password to reset your password.`,
   });
 
   const config = {
@@ -48,11 +40,20 @@ userRouter.post('/send-email', async (req, res) => {
   };
 
   try {
-    const response = await axios.request(config);
-    res.status(200).json({ message: 'Email sent successfully', UniqueID: encryptedOtp });
+    const matchUser = await UserSchema.findOneAndUpdate(
+      { email: email },
+      { otp: encryptOTP, otpCreatedAt: new Date() },
+      { new: true, fields: { createdOn: 0, __v: 0 } }
+    );
+    
+    if (matchUser) {
+      const response = await axios.request(config);
+      res.status(200).json({ message: 'Email sent successfully', UniqueID: encryptOTP });
+    } else {
+      res.status(202).json({ status: 205, message: "This Email ID is not registered yet. Please use the correct email or create new account" });
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to send email', error: error.message });
   }
 });
-
 module.exports = userRouter;

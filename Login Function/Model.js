@@ -8,6 +8,8 @@ var userSchema = new mongoose.Schema({
     role: {type: String, default:"User"},
     acc_token: {type: String},
     isUserActive: { type: Boolean },
+    otp: {type: String},
+    otpCreatedAt: {type: Date, default: new Date()},
     profileImage: {data: Buffer, contentType: String,},
     gender: {type: String},
     createdOn: {type: Date, default: new Date()},
