@@ -1,10 +1,5 @@
 {
     "version": 2,
-    "functions": {
-    "Archieved_Ticket/Routes.js": {
-      "maxDuration": 60
-    }
-},
     "builds": [
         {
             "src": "index.js",
