@@ -12,13 +12,13 @@ var AgentData = require("./Agent Details/Route");
 var AccountData = require("./AccountDetails/Route");
 var FetchAgent = require('./Agent Details/FetchAgent');
 var FetchAccount = require('./AccountDetails/FetchAccount');
-var ArchievedTicket = require('./Archieved Ticket/Routes');
+var ArchievedTicket = require('./Archieved_Ticket/Routes');
 var SendEmail = require("./Email Data/sendEmail");
 var FetchData = require("./FetchData/fetch");
 var fetchUser = require("./Fetch Function/fetchUser")
 var UpdatePassword = require("./Update Function/Route")
 var Token = require("./Login Function/tokengenerate");
-var createArchTicket = require("./Archieved Ticket/CreateRoute");
+var createArchTicket = require("./Archieved_Ticket/CreateRoute");
 var validateOTP = require("./Email Data/VerifyOTP")
 var serverless = require("serverless-http")
 

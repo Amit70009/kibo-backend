@@ -1,8 +1,8 @@
 {
     "version": 2,
     "functions": {
-    "Archieved Ticket/Routes.js": {
-      "maxDuration": 60 // This function can run for a maximum of 30 seconds
+    "Archieved_Ticket/Routes.js": {
+      "maxDuration": 60
     }
 },
     "builds": [
