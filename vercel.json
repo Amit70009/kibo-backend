@@ -1,5 +1,10 @@
 {
     "version": 2,
+    "functions": {
+    "api/v1/users/archieved-ticket": {
+      "maxDuration": 60 // This function can run for a maximum of 30 seconds
+    }
+},
     "builds": [
         {
             "src": "index.js",

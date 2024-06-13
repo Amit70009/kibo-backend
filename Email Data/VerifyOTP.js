@@ -8,9 +8,6 @@ userRouter.post("/validate-otp", async (req, res) => {
   const email = req.body.email;
   const otp = req.body.otp;
 
-  console.log(email);
-  console.log(otp);
-
   try {
     const user = await UserSchema.findOne({ email: email });
     if (!user) {
