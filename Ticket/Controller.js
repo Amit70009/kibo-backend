@@ -88,18 +88,16 @@ async function Ticket(dataFromExternalSource) {
           },
         }
       );
-      // const ticketMetrics = await axios.get(
-      //   `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       accept: "application/json",
-      //       Authorization: `Bearer ${accessToken}`,
-      //     },
-      //   }
-      // )
-      
-      // console.log(ticketMetrics.data);
+      const ticketMetrics = await axios.get(
+        `https://desk.zoho.com/api/v1/tickets/${ticket.id}/metrics`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
 
       let accountData;
 
@@ -166,6 +164,15 @@ async function Ticket(dataFromExternalSource) {
     age_bucket = "More than 90 days"
   }
 
+  const convertTimeToMinutes = (time) => {
+    const [hours, minutes] = time.split(':');
+    return parseInt(hours) * 60 + parseInt(minutes);
+  };
+  const timeInMinutes = convertTimeToMinutes(ticketMetrics.data.firstResponseTime.split(' ')[0]);
+const thresholdInMinutes = convertTimeToMinutes("24:00");
+
+const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
+
   let last_department_age_bucket;
 
   if (lastDepartmentDifference >= 1 && lastDepartmentDifference <= 3) {
@@ -191,6 +198,7 @@ async function Ticket(dataFromExternalSource) {
           ? `${agentInfo.firstName} ${agentInfo.lastName}`
           : "Unassigned";
         const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
+        
 
         return TicketSchema.create({
           ticket_id: ticket.ticketNumber,
@@ -202,6 +210,8 @@ async function Ticket(dataFromExternalSource) {
           ticket_owner_email,
           account_name: accountData.data.accountName,
           status: ticket.status,
+          first_response_time: ticketMetrics.data.firstResponseTime,
+          first_response_time_status: FRT,
           created_at: ticket.createdTime,
           resolution: specificData.data.resolution,
           last_modified: specificData.data.modifiedTime,
@@ -232,6 +242,8 @@ async function Ticket(dataFromExternalSource) {
         existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.last_touched = lastTicketTouched;
         existingTicket.status = ticket.status;
+        existingTicket.first_response_time = ticketMetrics.data.firstResponseTime;
+        existingTicket.first_response_time_status = FRT;
         existingTicket.ticket_subject = ticket.subject;
         existingTicket.resolution = specificData.data.resolution;
         existingTicket.last_modified = specificData.data.modifiedTime;

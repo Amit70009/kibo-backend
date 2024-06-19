@@ -96,7 +96,7 @@ async function createArchTicket(dataFromExternalSource) {
     const allData = [];
   
       const externalData = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=1&limit=100&departmentId=832118000027344117&viewType=1`,
+        `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=1&limit=100&departmentId=832118000000006907&viewType=1`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -146,16 +146,16 @@ async function createArchTicket(dataFromExternalSource) {
         }
       );
 
-      // const ticketMetrics = await axios.get(
-      //   `https://desk.zoho.com/api/v1/tickets/832118000033612001/metrics`,
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       accept: "application/json",
-      //       Authorization: `Bearer ${accessToken}`,
-      //     },
-      //   }
-      // )
+      const ticketMetrics = await axios.get(
+        `https://desk.zoho.com/api/v1/tickets/${ticket.id}/metrics`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
       
       // console.log(ticketMetrics.data);
 
@@ -191,6 +191,14 @@ async function createArchTicket(dataFromExternalSource) {
 
     const createDate = ticket.createdTime
     
+    const convertTimeToMinutes = (time) => {
+      const [hours, minutes] = time.split(':');
+      return parseInt(hours) * 60 + parseInt(minutes);
+    };
+    const timeInMinutes = convertTimeToMinutes(ticketMetrics.data.firstResponseTime.split(' ')[0]);
+  const thresholdInMinutes = convertTimeToMinutes("24:00");
+  
+  const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
 
     const dateString1 = specificData.data.closedTime ? specificData.data.closedTime.split('T')[0] : apiCallTime.toISOString().split('T')[0];
     const dateString2 = ticket.createdTime.split('T')[0];
@@ -258,6 +266,8 @@ async function createArchTicket(dataFromExternalSource) {
           email: ticket.email,
           ticket_owner,
           ticket_owner_email,
+          first_response_time: ticketMetrics.data.firstResponseTime,
+          first_response_time_status: FRT,
           account_name: accountData.data.accountName,
           status: ticket.status,
           created_at: ticket.createdTime,
@@ -290,6 +300,8 @@ async function createArchTicket(dataFromExternalSource) {
         existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.last_touched = lastTicketTouched;
         existingTicket.status = ticket.status;
+        existingTicket.first_response_time = ticketMetrics.data.firstResponseTime;
+        existingTicket.first_response_time_status = FRT;
         existingTicket.ticket_subject = ticket.subject;
         existingTicket.resolution = specificData.data.resolution;
         existingTicket.last_modified = specificData.data.modifiedTime;
