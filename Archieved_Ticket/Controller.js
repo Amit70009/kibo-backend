@@ -92,11 +92,12 @@ async function createArchTicket(dataFromExternalSource) {
     const apiCallTime = new Date();
    
     const accessToken = await getRefreshToken();
+    // console.log(accessToken);
     const batchSize = 20
     const allData = [];
   
       const externalData = await axios.get(
-        `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=1&limit=100&departmentId=832118000000006907&viewType=1`,
+        `https://desk.zoho.com/api/v1/tickets/archivedTickets?from=1&limit=100&departmentId=832118000022988053&viewType=1`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -106,7 +107,6 @@ async function createArchTicket(dataFromExternalSource) {
         }
       );
       allData.push(...externalData.data.data);
-  
    
     const agentsResponse = await axios.get(
       "https://desk.zoho.com/api/v1/agents?limit=200",
@@ -296,7 +296,7 @@ async function createArchTicket(dataFromExternalSource) {
         existingTicket.last_update = apiCallTime;
         existingTicket.resolved_at = specificData.data.closedTime || null;
         existingTicket.ticket_owner = ticket_owner;
-        existingTicket.department = departmentId.data.name;
+        existingTicket.department = specificData.data.layoutDetails.layoutName,
         existingTicket.ticket_owner_email = ticket_owner_email;
         existingTicket.last_touched = lastTicketTouched;
         existingTicket.status = ticket.status;

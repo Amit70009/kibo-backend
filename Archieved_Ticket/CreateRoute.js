@@ -9,7 +9,7 @@ userRouter.post("/create-archieved-tickets", async (req, res) => {
     res.send({
         status: callLoginMethod.status,
         message: callLoginMethod.message,
-        data: callLoginMethod.data
+        // data: callLoginMethod.data
     })
 })
 
