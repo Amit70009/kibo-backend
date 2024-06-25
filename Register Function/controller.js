@@ -22,6 +22,7 @@ async function userRegister(data){
             email: data.email,
             role: data.role,
             gender: data.gender,
+            userStatus: data.userStatus,
             password: encryptPass,
             createdOn: new Date(),
         }
@@ -49,14 +50,17 @@ try {
         },
     {
         $set:{
-            password: encryptPass
+            password: encryptPass,
+            role: allParams.role,
+            userStatus: allParams.userStatus
         }
     });
 
     if (checkUser) {
         return {
           status: 200,
-          message: "Password Updated Successfully",
+          message: "User Updated Successfully",
+        //   data: {checkUser}
         };
       }
 } catch (error) {

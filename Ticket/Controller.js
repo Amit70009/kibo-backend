@@ -268,7 +268,7 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
 
     return {
       status: 200,
-      message: "Orders Created Successfully",
+      message: "Tickets Created Successfully",
       data: { createdTickets },
     };
   } catch (error) {

@@ -12,7 +12,6 @@ async function userLogin(data){
         if(matchUser){
     
         let decryptPass = await CommonFunc.decryptPassword(data.password, matchUser.password);
-        console.log(decryptPass);
         if(decryptPass == false){
             return {
                 status: 202,
@@ -52,7 +51,6 @@ async function userLogin(data){
 
 async function fetchProfile(data){
 try {
-    console.log(data);
     var matchUser = await UserSchema.findOne({
     email: data });
     if(matchUser){
