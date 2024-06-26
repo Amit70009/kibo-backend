@@ -87,6 +87,24 @@ async function fetchUser(userEmail) {
     }
 }
 
+async function deleteUser(userEmail) {
+  
+    try {
+        var fetch = await UserSchema.findOneAndDelete({
+            email: userEmail
+        })
+        if(fetch){
+            return {
+                status: 200,
+                message: "User Deleted Successfully",
+              };
+        }
+    } catch (error) {
+        console.log(error);
+        throw error
+    }
+}
+
 
 async function fetchAllUser() {
   
@@ -104,4 +122,4 @@ async function fetchAllUser() {
         throw error
     }
 }
-module.exports = { userRegister, UpdateUser, fetchUser, fetchAllUser }
+module.exports = { userRegister, UpdateUser, fetchUser, fetchAllUser, deleteUser }
