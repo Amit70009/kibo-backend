@@ -5,7 +5,7 @@ var mongoose = require("mongoose");
 
 userRouter.delete("/delete-user/:email", async (req, res) => {
     const userEmail = req.params.email;
-    var callDeleteUser = await UserController.UpdateUser(userEmail); // Swap the parameters
+    var callDeleteUser = await UserController.deleteUser(userEmail); // Swap the parameters
     res.send({
         status:  callDeleteUser.status,
         message: callDeleteUser.message,
