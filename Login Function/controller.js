@@ -7,10 +7,9 @@ var CommonFunc = require("../commonfunction.js");
 async function userLogin(data){
     try {
         var matchUser = await UserSchema.findOne({
-           email: data.email
+           email: data.email,
         },{createdOn: 0, __v: 0})
-        if(matchUser){
-    
+        if(matchUser.userStatus == "Active"){
         let decryptPass = await CommonFunc.decryptPassword(data.password, matchUser.password);
         if(decryptPass == false){
             return {
@@ -34,8 +33,15 @@ async function userLogin(data){
                 full_name: matchUser.full_name,
                 email: matchUser.email,
                 role: matchUser.role,
-                acc_token: genToken
+                acc_token: genToken,
+                userStatus: matchUser.userStatus
             }
+        }
+    }
+    else if(matchUser.userStatus != "Active"){
+        return {
+            status: 401,
+            message: "Your account request is not approved yet. Please reach out to Admin ",
         }
     }
     return {

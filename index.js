@@ -20,7 +20,8 @@ var UpdatePassword = require("./Update Function/Route")
 var Token = require("./Login Function/tokengenerate");
 var createArchTicket = require("./Archieved_Ticket/CreateRoute");
 var validateOTP = require("./Email Data/VerifyOTP")
-var serverless = require("serverless-http")
+var serverless = require("serverless-http");
+const fetchAllUser = require('./Fetch Function/fetchAllUser');
 
 app.use(cors({
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +65,7 @@ app.use("/api/v1/users", UpdatePassword);
 app.use("/api/v1/users", fetchUser)
 app.use("/api/v1/users", SendEmail);
 app.use("/api/v1/users", validateOTP);
+app.use("/api/v1/users", fetchAllUser)
 
 
 app.listen(Constant.portNo, async (error, conn) => {

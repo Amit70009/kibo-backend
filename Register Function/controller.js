@@ -87,4 +87,21 @@ async function fetchUser(userEmail) {
     }
 }
 
-module.exports = { userRegister, UpdateUser, fetchUser }
+
+async function fetchAllUser() {
+  
+    try {
+        var fetchAll = await UserSchema.find()
+        if(fetchAll){
+            return {
+                status: 200,
+                message: "All User Fetched Successfully",
+                data: {fetchAll}
+              };
+        }
+    } catch (error) {
+        console.log(error);
+        throw error
+    }
+}
+module.exports = { userRegister, UpdateUser, fetchUser, fetchAllUser }
