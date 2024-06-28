@@ -79,6 +79,7 @@ async function fetchUser(userEmail) {
             return {
                 status: 200,
                 message: "User Fetched Successfully",
+                data: fetch
               };
         }
     } catch (error) {

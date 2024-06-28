@@ -23,6 +23,9 @@ var validateOTP = require("./Email Data/VerifyOTP")
 var serverless = require("serverless-http");
 const fetchAllUser = require('./Fetch Function/fetchAllUser');
 const deleteUser = require('./Delete Function/deleteuser');
+const searchTicketbynumber = require('./Search Ticket/numberRoute');
+const searchTicketbyID = require('./Search Ticket/idRoute');
+const ticketUpdate = require("./Update Ticket/updateRoute")
 
 app.use(cors({
   "Access-Control-Allow-Origin": "*",
@@ -67,8 +70,10 @@ app.use("/api/v1/users", fetchUser)
 app.use("/api/v1/users", SendEmail);
 app.use("/api/v1/users", validateOTP);
 app.use("/api/v1/users", fetchAllUser);
-app.use("/api/v1/users", deleteUser)
-
+app.use("/api/v1/users", deleteUser);
+app.use("/api/v1/users", searchTicketbynumber);
+app.use("/api/v1/users", searchTicketbyID);
+app.use("/api/v1/users", ticketUpdate);
 
 app.listen(Constant.portNo, async (error, conn) => {
   if(error){
