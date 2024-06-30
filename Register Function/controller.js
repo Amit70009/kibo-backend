@@ -42,32 +42,57 @@ async function userRegister(data){
     }
 };
 
-async function UpdateUser (userEmail, allParams, data) {
-    let encryptPass = await CommonFunc.encryptPassword(allParams.password);
-try {
-    var checkUser = await UserSchema.findOneAndUpdate({
-        email: userEmail
-        },
-    {
-        $set:{
-            password: encryptPass,
-            role: allParams.role,
-            userStatus: allParams.userStatus
-        }
-    });
-
-    if (checkUser) {
+async function UpdateUser(userEmail, allParams) {
+    try {
+      // Find the current user data
+      const user = await UserSchema.findOne({ email: userEmail });
+  
+      if (!user) {
+        return {
+          status: 404,
+          message: "User not found",
+        };
+      }
+  
+      // Prepare the fields to update
+      let updates = {};
+  
+      if (allParams.password) {
+        const encryptPass = await CommonFunc.encryptPassword(allParams.password);
+        updates.password = encryptPass;
+      }
+      if (allParams.role) {
+        updates.role = allParams.role;
+      }
+      if (allParams.userStatus) {
+        updates.userStatus = allParams.userStatus;
+      }
+  
+      // Update the user document with the new values
+      const updatedUser = await UserSchema.findOneAndUpdate(
+        { email: userEmail },
+        { $set: updates },
+        { new: true } // return the updated document
+      );
+  
+      if (updatedUser) {
         return {
           status: 200,
           message: "User Updated Successfully",
-        //   data: {checkUser}
+          data: updatedUser,
+        };
+      } else {
+        return {
+          status: 500,
+          message: "Failed to update user",
         };
       }
-} catch (error) {
-    console.log(error);
-    throw error
-}
-};
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  
 
 async function fetchUser(userEmail) {
   

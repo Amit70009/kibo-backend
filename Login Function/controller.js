@@ -38,12 +38,12 @@ async function userLogin(data){
             }
         }
     }
-    else if(matchUser.userStatus != "Active"){
-        return {
-            status: 401,
-            message: "Your account request is not approved yet. Please reach out to Admin ",
-        }
-    }
+    // else if(matchUser.userStatus != "Active"){
+    //     return {
+    //         status: 401,
+    //         message: "Your account request is not approved yet. Please reach out to Admin ",
+    //     }
+    // }
     return {
         status: 404,
         message: "User not found, Either Email or password is incorrect",
