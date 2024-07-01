@@ -2,13 +2,12 @@ const { ObjectID } = require("bson");
 var UserSchema = require("../Login Function/Model").usermodel;
 var CommonFunc = require("../commonfunction.js");
 
-
-/* For Login */
 async function userLogin(data){
     try {
         var matchUser = await UserSchema.findOne({
            email: data.email,
         },{createdOn: 0, __v: 0})
+        if(matchUser){
         if(matchUser.userStatus == "Active"){
         let decryptPass = await CommonFunc.decryptPassword(data.password, matchUser.password);
         if(decryptPass == false){
@@ -37,13 +36,15 @@ async function userLogin(data){
                 userStatus: matchUser.userStatus
             }
         }
+        }
+        else if(matchUser.userStatus != "Active"){
+            return {
+                status: 401,
+                message: "Your account request is not approved yet. Please reach out to Admin ",
+            }
+        }
     }
-    // else if(matchUser.userStatus != "Active"){
-    //     return {
-    //         status: 401,
-    //         message: "Your account request is not approved yet. Please reach out to Admin ",
-    //     }
-    // }
+    
     return {
         status: 404,
         message: "User not found, Either Email or password is incorrect",
