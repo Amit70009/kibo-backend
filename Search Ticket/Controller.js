@@ -31,7 +31,7 @@ async function getRefreshToken() {
 async function searchTicketbynumber(ticketNumber) {
     try {
       const accessToken = await getRefreshToken();
-      const response = await axios.get(`https://desk.zoho.com/api/v1/tickets/search?ticketNumber=${ticketNumber}`, {
+      const response = await axios.get(`https://desk.zoho.com/api/v1/tickets/search?limit=100&ticketNumber=${ticketNumber}`, {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -57,7 +57,7 @@ async function searchTicketbynumber(ticketNumber) {
   async function searchTicketbyID(ticketID) {
     try {
       const accessToken = await getRefreshToken();
-      const response = await axios.get(`https://desk.zoho.com/api/v1/tickets/search?id=${ticketID}`, {
+      const response = await axios.get(`https://desk.zoho.com/api/v1/tickets/search?limit=100&id=${ticketID}`, {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
