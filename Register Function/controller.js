@@ -135,7 +135,7 @@ async function deleteUser(userEmail) {
 async function fetchAllUser() {
   
     try {
-        var fetchAll = await UserSchema.find()
+        var fetchAllUser = await UserSchema.find()
         if(fetchAllUser){
             return {
                 status: 200,

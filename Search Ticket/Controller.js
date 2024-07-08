@@ -83,8 +83,6 @@ async function searchTicketbynumber(ticketNumber) {
   async function updateTicket(data){
 try {
   const accessToken = await getRefreshToken();
-  console.log(accessToken);
-    console.log(data.ids);
     const response = await axios.post(`https://desk.zoho.com/api/v1/tickets/updateMany`, {
         fieldName: data.fieldName,
         ids: data.ids,
