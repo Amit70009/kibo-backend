@@ -277,63 +277,77 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
   }
 }
 
-async function GetAllData(data){
+async function GetAllData(data) {
   try {
-    const { start_date, end_date, ticket_owner_email, account_name, status, severity, created_start_date, created_end_date, department, is_ticket_archieved, ...otherParams } = data;
-    const startDate = start_date ? moment(start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-    const endDate = end_date ? moment(end_date).toDate() : new Date();
-    const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-    const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
+      const {
+          start_date,
+          end_date,
+          ticket_owner_email,
+          account_name,
+          status,
+          severity,
+          created_start_date,
+          created_end_date,
+          department,
+          is_ticket_archieved,
+          ...otherParams
+      } = data;
 
-    const query = {
-      ...otherParams, // Include other query parameters
-      last_modified: { $gte: startDate, $lte: endDate },
-      created_at: { $gte: createdStartDate, $lte: createdEndDate }
-    };
+      const startDate = start_date ? moment(start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
+      const endDate = end_date ? moment(end_date).toDate() : new Date();
+      const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
+      const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
 
-    if (ticket_owner_email) {
-      const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
-      query.ticket_owner_email = { $in: ticketOwners }; 
-    }
+      const query = {
+          ...otherParams, // Include other query parameters
+          last_modified: { $gte: startDate, $lte: endDate },
+          created_at: { $gte: createdStartDate, $lte: createdEndDate }
+      };
 
-    if (department) {
-      const departments = department.split(',').map(dep => dep.trim());
-      query.department = { $in: department }; 
-    }
+      // Apply filters based on provided parameters
+      if (ticket_owner_email) {
+          const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
+          query.ticket_owner_email = { $in: ticketOwners };
+      }
 
-    if (account_name) {
-      const accountOwners = account_name.split(',').map(accountowner => accountowner.trim());
-      query.account_name = { $in: accountOwners }; 
-    }
+      if (department) {
+          const departments = department.split(',').map(dep => dep.trim());
+          query.department = { $in: departments };
+      }
 
-    if (status) {
-      const ticketStatus = status.split(',').map(stat => stat.trim());
-      query.status = { $in: ticketStatus }; 
-    }
+      if (account_name) {
+          const accountOwners = account_name.split(',').map(accountowner => accountowner.trim());
+          query.account_name = { $in: accountOwners };
+      }
 
-    if (severity) {
-      const ticketSeverity = severity.split(',').map(sev => sev.trim());
-      query.severity = { $in: ticketSeverity }; 
-    }
+      if (status) {
+          const ticketStatus = status.split(',').map(stat => stat.trim());
+          query.status = { $in: ticketStatus };
+      }
 
-    if (is_ticket_archieved === 'all') {
-      // No filter on is_ticket_archeived
-    } else if (is_ticket_archieved !== undefined) {
-      query.is_ticket_archieved = is_ticket_archieved; // Include is_ticket_archeived filter if it's provided and not 'all'
-    }
+      if (severity) {
+          const ticketSeverity = severity.split(',').map(sev => sev.trim());
+          query.severity = { $in: ticketSeverity };
+      }
 
-        const ticketData = await TicketSchema.find(query);
-      // var ticketData = await TicketSchema.find(data)
-      if(ticketData){
-          return{
-              status: 200,
-              message: "All data Fetched Successfully",
-              data: {ticketData}
+      if (is_ticket_archieved !== 'all') {
+          if (is_ticket_archieved !== undefined) {
+              query.is_ticket_archieved = is_ticket_archieved; // Apply the filter if provided and not 'all'
           }
+      }
+
+      const ticketData = await TicketSchema.find(query);
+
+      if (ticketData) {
+          return {
+              status: 200,
+              message: "All data fetched successfully",
+              data: { ticketData }
+          };
       }
   } catch (error) {
       console.log(error);
-      throw error
+      throw error;
   }
 }
 
@@ -391,4 +405,37 @@ async function AccountName(accessToken) {
   }
 }
 
-module.exports = {Ticket, GetAllData, AccountName, AgentName};
+async function FetchAllAgent() {
+  try {
+      var fetchAllUser = await TicketSchema.find()
+      if(fetchAllUser){
+          return {
+              status: 200,
+              message: "All Agent Fetched Successfully",
+              data: {fetchAllUser}
+            };
+      }
+  } catch (error) {
+      console.log(error);
+      throw error
+  }
+}
+
+async function FetchAllClient() {
+  
+  try {
+      var fetchAllClient = await UserSchema.find()
+      if(fetchAllClient){
+          return {
+              status: 200,
+              message: "All Client Fetched Successfully",
+              data: {fetchAllClient}
+            };
+      }
+  } catch (error) {
+      console.log(error);
+      throw error
+  }
+}
+
+module.exports = {Ticket, GetAllData, AccountName, AgentName, FetchAllAgent, FetchAllClient};

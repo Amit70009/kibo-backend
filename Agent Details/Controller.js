@@ -99,7 +99,7 @@ async function CreateAgent() {
 if(agentData){
     return{
         status: 200,
-        message: "All data Fetched Successfully",
+        message: "All Agent Fetched Successfully",
         data: {agentData}
     }
         }

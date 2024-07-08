@@ -136,11 +136,11 @@ async function fetchAllUser() {
   
     try {
         var fetchAll = await UserSchema.find()
-        if(fetchAll){
+        if(fetchAllUser){
             return {
                 status: 200,
                 message: "All User Fetched Successfully",
-                data: {fetchAll}
+                data: {fetchAllUser}
               };
         }
     } catch (error) {
@@ -148,4 +148,21 @@ async function fetchAllUser() {
         throw error
     }
 }
-module.exports = { userRegister, UpdateUser, fetchUser, fetchAllUser, deleteUser }
+
+async function fetchAllClient() {
+  
+  try {
+      var fetchAllClient = await UserSchema.find()
+      if(fetchAllClient){
+          return {
+              status: 200,
+              message: "All Client Fetched Successfully",
+              data: {fetchAllClient}
+            };
+      }
+  } catch (error) {
+      console.log(error);
+      throw error
+  }
+}
+module.exports = { userRegister, UpdateUser, fetchUser, fetchAllUser, deleteUser, fetchAllClient }
