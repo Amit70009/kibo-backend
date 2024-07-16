@@ -319,14 +319,17 @@ async function GetAllData(data) {
       const query = {
           ...otherParams, // Include other query parameters
           last_modified: { $gte: startDate, $lte: endDate },
-          created_at: { $gte: createdStartDate, $lte: createdEndDate },
-          resolved_at: { $gte: resolvedStartDate, $lte: resolvedEndDate}
+          created_at: { $gte: createdStartDate, $lte: createdEndDate }
       };
 
       // Apply filters based on provided parameters
       if (ticket_owner_email) {
           const ticketOwners = ticket_owner_email.split(',').map(owner => owner.trim());
           query.ticket_owner_email = { $in: ticketOwners };
+      }
+
+      if (resolvedStartDate && resolvedEndDate) {
+        query.resolved_at = { $gte: resolvedStartDate, $lte: resolvedEndDate };
       }
 
       if (department) {
