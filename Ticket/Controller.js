@@ -314,7 +314,7 @@ async function GetAllData(data) {
       const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
       const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
       const resolvedStartDate = resolved_start_date ? moment(resolved_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-      const resolvedEndDate = resolved_end_date ? moment(resolved_end_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
+      const resolvedEndDate = resolved_end_date ? moment(resolved_end_date).toDate() : new Date();
 
       const query = {
           ...otherParams, // Include other query parameters
