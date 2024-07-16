@@ -5,7 +5,6 @@ var mongoose = require("mongoose");
 
 userRouter.get("/agent-name", async (req, res) => {
     var callLoginMethod = await UserController.AgentName();
-    // console.log(callLoginMethod);
     res.send({
         status: callLoginMethod.status,
         message: callLoginMethod.message,

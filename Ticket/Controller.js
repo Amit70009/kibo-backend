@@ -35,7 +35,10 @@ async function Ticket(dataFromExternalSource) {
    
     const accessToken = await getRefreshToken();
 // console.log(accessToken);
-   
+    const agentLimit = 200;
+    let agentResponse = [];
+    let page = 1;
+    let hasMoreAgentData = true;
     const batchSize = 20
     const allData = [];
   
@@ -51,19 +54,30 @@ async function Ticket(dataFromExternalSource) {
       );
       allData.push(...externalData.data.data);
    
-    const agentsResponse = await axios.get(
-      "https://desk.zoho.com/api/v1/agents?limit=200",
-      {
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+      while (hasMoreAgentData) {
+        const agentsResponse = await axios.get(
+          `https://desk.zoho.com/api/v1/agents?limit=${agentLimit}&from=${page}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const data = agentsResponse.data;
+      agentResponse = agentResponse.concat(data.data);
+
+      if (data.data.length < agentLimit) {
+        hasMoreAgentData = false;
+        // If the number of returned agents is less than the limit, we are done
+      } else {
+        page += agentLimit; // Otherwise, move to the next page
       }
-    );
+    }
 
     const agentsMap = {};
-    agentsResponse.data.data.forEach((agent) => {
+    agentResponse.forEach((agent) => {
       agentsMap[agent.id] = {
         firstName: agent.firstName,
         lastName: agent.lastName,
@@ -282,6 +296,8 @@ async function GetAllData(data) {
       const {
           start_date,
           end_date,
+          resolved_start_date,
+          resolved_end_date,
           ticket_owner_email,
           account_name,
           status,
@@ -297,11 +313,14 @@ async function GetAllData(data) {
       const endDate = end_date ? moment(end_date).toDate() : new Date();
       const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
       const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
+      const resolvedStartDate = resolved_start_date ? moment(resolved_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
+      const resolvedEndDate = resolved_end_date ? moment(resolved_end_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
 
       const query = {
           ...otherParams, // Include other query parameters
           last_modified: { $gte: startDate, $lte: endDate },
-          created_at: { $gte: createdStartDate, $lte: createdEndDate }
+          created_at: { $gte: createdStartDate, $lte: createdEndDate },
+          resolved_at: { $gte: resolvedStartDate, $lte: resolvedEndDate}
       };
 
       // Apply filters based on provided parameters
@@ -337,7 +356,7 @@ async function GetAllData(data) {
       }
 
       const ticketData = await TicketSchema.find(query);
-
+console.log(query);
       if (ticketData) {
           return {
               status: 200,
@@ -366,8 +385,9 @@ try {
   );
 
   const data = agentsResponse.data
-
+console.log(agentsResponse.data.length);
   if(agentsResponse){
+    
     return{
         status: 200,
         message: "All agent Fetched Successfully",
