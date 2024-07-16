@@ -313,8 +313,8 @@ async function GetAllData(data) {
       const endDate = end_date ? moment(end_date).toDate() : new Date();
       const createdStartDate = created_start_date ? moment(created_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
       const createdEndDate = created_end_date ? moment(created_end_date).toDate() : new Date();
-      const resolvedStartDate = resolved_start_date ? moment(resolved_start_date).toDate() : new Date("2020-01-01T00:00:00.000Z");
-      const resolvedEndDate = resolved_end_date ? moment(resolved_end_date).toDate() : new Date();
+      const resolvedStartDate = resolved_start_date ? moment(resolved_start_date).toDate() : undefined;
+      const resolvedEndDate = resolved_end_date ? moment(resolved_end_date).toDate() : undefined;
 
       const query = {
           ...otherParams, // Include other query parameters
@@ -359,7 +359,6 @@ async function GetAllData(data) {
       }
 
       const ticketData = await TicketSchema.find(query);
-console.log(query);
       if (ticketData) {
           return {
               status: 200,
