@@ -9,7 +9,7 @@ userRouter.post("/ticket-create", async (req, res) => {
     res.send({
         status: callLoginMethod.status,
         message: callLoginMethod.message,
-        data: "done"
+        // data: callLoginMethod.data[0]
     })
 })
 
