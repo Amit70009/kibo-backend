@@ -9,6 +9,7 @@ userRouter.use(express.json());
 
 userRouter.post('/send-email', async (req, res) => {
   const email = req.body.email;
+  // const emailData = req.body.emailData;
   const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false }); // Encrypt the OTP
   let encryptOTP = await CommonFunc.encryptPassword(otp);
   

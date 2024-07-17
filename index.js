@@ -17,6 +17,8 @@ var SendEmail = require("./Email Data/sendEmail");
 var FetchData = require("./FetchData/fetch");
 var fetchUser = require("./Fetch Function/fetchUser")
 var UpdatePassword = require("./Update Function/Route")
+var SendConfirmationEmail = require("./Email Data/sendConfirmationEmail")
+var SendRejectionEmail = require("./Email Data/sendDeniedEmail")
 var Token = require("./Login Function/tokengenerate");
 var createArchTicket = require("./Archieved_Ticket/CreateRoute");
 var validateOTP = require("./Email Data/VerifyOTP")
@@ -31,7 +33,8 @@ const ticketUpdate = require("./Update Ticket/updateRoute")
 app.use(cors({
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE",
-  "Access-Control-Allow-Headers": "Content-Type"
+  "Access-Control-Allow-Headers": "Content-Type",
+  credentials: true
 }));
 app.use(express.json());
 require('dotenv').config();
@@ -75,6 +78,8 @@ app.use("/api/v1/users", deleteUser);
 app.use("/api/v1/users", searchTicketbynumber);
 app.use("/api/v1/users", searchTicketbyID);
 app.use("/api/v1/users", ticketUpdate);
+app.use("/api/v1/users", SendConfirmationEmail);
+app.use("/api/v1/users", SendRejectionEmail);
 
 app.listen(Constant.portNo, async (error, conn) => {
   if(error){
