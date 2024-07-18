@@ -85,7 +85,7 @@ async function CreateAgent() {
       return {
         status: 200,
         message: "Agents Saved Successfully",
-        data: allData
+        data: { allData }
       };
     } catch (error) {
       console.error("Error creating/updating agents:", error);

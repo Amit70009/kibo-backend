@@ -75,7 +75,7 @@ async function CreateAccount() {
       return {
         status: 200,
         message: "Accounts Saved Successfully",
-        data: allData
+        data: { allData }
       };
     } catch (error) {
       console.error("Error creating/updating accounts:", error);
@@ -90,7 +90,7 @@ if(accountData){
     return{
         status: 200,
         message: "All data Fetched Successfully",
-        data: {accountData}
+        data: { accountData }
     }
         }
     } catch (error) {

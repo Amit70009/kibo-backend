@@ -1,5 +1,6 @@
 const axios = require("axios");
 const moment = require('moment');
+const { get } = require("./Routes.js");
 const TicketSchema = require("../Ticket/Model.js").ticketModel;
 
 let refreshTokenData = null;
@@ -164,12 +165,12 @@ async function Ticket(dataFromExternalSource) {
     
     let age_bucket;
 
-    if (difference >= 1 && difference <= 3) {
-      age_bucket = "1-3 days";
-    } else if(difference >=4 && difference <= 10) {
-      age_bucket = "4-10 days"
-    } else if(difference >=11 && difference <= 30) {
-      age_bucket = "11-30 days"
+    if (difference >= 1 && difference <= 7) {
+      age_bucket = "0-7 days";
+    } else if(difference >=8 && difference <= 15) {
+      age_bucket = "8-15 days"
+    } else if(difference >=16 && difference <= 30) {
+      age_bucket = "16-30 days"
   } else if(difference >=31 && difference <= 60) {
     age_bucket = "31-60 days"
 } else if(difference >= 61 && difference <= 90) {
@@ -189,12 +190,12 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
 
   let last_department_age_bucket;
 
-  if (lastDepartmentDifference >= 1 && lastDepartmentDifference <= 3) {
-    last_department_age_bucket = "1-3 days";
-  } else if(lastDepartmentDifference >=4 && lastDepartmentDifference <= 10) {
-    last_department_age_bucket = "4-10 days"
-  } else if(lastDepartmentDifference >=11 && lastDepartmentDifference <= 30) {
-    last_department_age_bucket = "11-30 days"
+  if (lastDepartmentDifference >= 1 && lastDepartmentDifference <= 7) {
+    last_department_age_bucket = "0-7 days";
+  } else if(lastDepartmentDifference >=8 && lastDepartmentDifference <= 15) {
+    last_department_age_bucket = "8-15 days"
+  } else if(lastDepartmentDifference >=16 && lastDepartmentDifference <= 30) {
+    last_department_age_bucket = "16-30 days"
 } else if(lastDepartmentDifference >=31 && lastDepartmentDifference <= 60) {
   last_department_age_bucket = "31-60 days"
 } else if(lastDepartmentDifference >= 61 && lastDepartmentDifference <= 90) {
@@ -213,9 +214,9 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
           : "Unassigned";
         const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
         
-
         return TicketSchema.create({
           ticket_id: ticket.ticketNumber,
+          ticket_long_id: ticket.id,
           ticket_url: ticket.webUrl,
           ticket_subject: ticket.subject,
           department: specificData.data.layoutDetails.layoutName,
@@ -224,21 +225,35 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
           ticket_owner_email,
           account_name: accountData.data.accountName,
           status: ticket.status,
-          first_response_time: ticketMetrics.data.firstResponseTime,
-          first_response_time_status: FRT,
+          status_type: ticket.statusType,
+          is_trashed: specificData.data.isTrashed,
+          customer_last_response_time: ticket.customerResponseTime ?  ticket.customerResponseTime : "null",
+          first_response_time: ticketMetrics.data.firstResponseTime ? ticketMetrics.data.firstResponseTime : "null",
+          first_response_time_status: FRT ? FRT : 'null',
           created_at: ticket.createdTime,
-          resolution: specificData.data.resolution,
+          resolution: specificData.data.resolution ? specificData.data.resolution : "null",
           last_modified: specificData.data.modifiedTime,
           severity: specificData.data.customFields["Severity"],
           last_update: apiCallTime,
-          resolved_at: specificData.data.closedTime || null,
-          ticket_age: difference,
-          age_bucket: age_bucket,
-          last_touched: lastTicketTouched,
+          resolved_at: specificData.data.closedTime,
+          ticket_age: difference ? difference : 'null',
+          age_bucket: age_bucket ? age_bucket : 'null',
+          last_touched: lastTicketTouched ? lastTicketTouched : 'null',
           last_department_age_bucket: last_department_age_bucket !== null ? last_department_age_bucket : "null",
-          last_department_ticket_age: lastDepartmentDifference,
+          last_department_ticket_age: lastDepartmentDifference ? lastDepartmentDifference : 'null',
           is_ticket_archieved: specificData.data.isArchived,
-          department_transfer_time: specificData.data.cf.cf_department_transfer_time_1
+          department_transfer_time: specificData.data.cf.cf_department_transfer_time_1 ? specificData.data.cf.cf_department_transfer_time_1 : 'null',
+          custom_data: {
+            classification: specificData.data.classification ? specificData.data.classification : 'null' ,
+            request_escalation: specificData.data.cf.cf_request_escalation,
+            escalation_reason: specificData.data.cf.cf_escalation_request_reason ? specificData.data.cf.cf_escalation_request_reason : 'null' ,
+            is_sev1: specificData.data.cf.cf_report_sev1,
+            resolution_type: specificData.data.cf.cf_resolution_type ? specificData.data.cf.cf_resolution_type : 'null',
+            issue_type: specificData.data.cf.cf_issue_type_d1 ? specificData.data.cf.cf_issue_type_d1 : 'null',
+            issue_sub_type: specificData.data.cf.cf_issue_sub_type_d2 ? specificData.data.cf.cf_issue_sub_type_d2 : 'null',
+            jira_id: specificData.data.cf.cf_jira_issue_id ? specificData.data.cf.cf_jira_issue_id : 'null',
+            resolution_owner: specificData.data.cf.cf_resolution_owner_1 ? specificData.data.cf.cf_resolution_owner_1 : 'null',
+          }
         });
       } else {     
         const accountId = ticket.assigneeId;
@@ -250,25 +265,40 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
         const ticket_owner_email = agentInfo ? `${agentInfo.email}` : "null";
 
         existingTicket.last_update = apiCallTime;
-        existingTicket.resolved_at = specificData.data.closedTime || null;
+        existingTicket.ticket_long_id = ticket.id;
+        existingTicket.resolved_at = specificData.data.closedTime;
         existingTicket.ticket_owner = ticket_owner;
         existingTicket.department = specificData.data.layoutDetails.layoutName;
         existingTicket.ticket_owner_email = ticket_owner_email;
-        existingTicket.last_touched = lastTicketTouched;
+        existingTicket.last_touched = lastTicketTouched ? lastTicketTouched : 'null';
         existingTicket.status = ticket.status;
-        existingTicket.first_response_time = ticketMetrics.data.firstResponseTime;
-        existingTicket.first_response_time_status = FRT;
+        existingTicket.status_type = ticket.statusType;
+        existingTicket.is_trashed = specificData.data.isTrashed;
+        existingTicket.customer_last_response_time = ticket.customerResponseTime ? ticket.customerResponseTime : 'null';
+        existingTicket.first_response_time = ticketMetrics.data.firstResponseTime ? ticketMetrics.data.firstResponseTime : 'null';
+        existingTicket.first_response_time_status = FRT ? FRT : 'null';
         existingTicket.ticket_subject = ticket.subject;
-        existingTicket.resolution = specificData.data.resolution;
-        existingTicket.last_modified = specificData.data.modifiedTime;
+        existingTicket.resolution = specificData.data.resolution ? specificData.data.resolution : 'null';
+        existingTicket.last_modified = specificData.data.modifiedTime ? specificData.data.modifiedTime : 'null';
         existingTicket.severity = specificData.data.customFields["Severity"];
         existingTicket.account_name = accountData.data.accountName;
-        existingTicket.age_bucket = age_bucket;
-        existingTicket.last_department_ticket_age = lastDepartmentDifference;
-        existingTicket.last_department_age_bucket = last_department_age_bucket !== null ? last_department_age_bucket : "null";
-        existingTicket.ticket_age = difference;
+        existingTicket.age_bucket = age_bucket ? age_bucket : 'null';
+        existingTicket.last_department_ticket_age = lastDepartmentDifference ? lastDepartmentDifference : 'null';
+        existingTicket.last_department_age_bucket = last_department_age_bucket ? last_department_age_bucket : "null";
+        existingTicket.ticket_age = difference ? difference : 'null';
         existingTicket.is_ticket_archieved = specificData.data.isArchived;
-        existingTicket.department_transfer_time = specificData.data.cf.cf_department_transfer_time_1;
+        existingTicket.department_transfer_time = specificData.data.cf.cf_department_transfer_time_1 ? specificData.data.cf.cf_department_transfer_time_1 : 'null';
+        existingTicket.custom_data = {
+          classification: specificData.data.classification ? specificData.data.classification : 'null' ,
+            request_escalation: specificData.data.cf.cf_request_escalation,
+            escalation_reason: specificData.data.cf.cf_escalation_request_reason ? specificData.data.cf.cf_escalation_request_reason : 'null' ,
+            is_sev1: specificData.data.cf.cf_report_sev1,
+            resolution_type: specificData.data.cf.cf_resolution_type ? specificData.data.cf.cf_resolution_type : 'null',
+            issue_type: specificData.data.cf.cf_issue_type_d1 ? specificData.data.cf.cf_issue_type_d1 : 'null',
+            issue_sub_type: specificData.data.cf.cf_issue_sub_type_d2 ? specificData.data.cf.cf_issue_sub_type_d2 : 'null',
+            jira_id: specificData.data.cf.cf_jira_issue_id ? specificData.data.cf.cf_jira_issue_id : 'null',
+            resolution_owner: specificData.data.cf.cf_resolution_owner_1 ? specificData.data.cf.cf_resolution_owner_1 : 'null',
+        }
         await existingTicket.save(); // Save the updated ticket
         return existingTicket;
       }

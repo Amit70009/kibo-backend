@@ -83,10 +83,6 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         max-width: 580px;
         padding: 10px; 
       }
-      
-      /* -------------------------------------
-          HEADER, FOOTER, MAIN
-      ------------------------------------- */
       .main {
         background: #ffffff;
         border-radius: 3px;
@@ -106,11 +102,7 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         padding-bottom: 10px;
         padding-top: 10px;
       }
-      
-      
-      /* -------------------------------------
-          TYPOGRAPHY
-      ------------------------------------- */
+
       h1,
       h2,
       h3,
@@ -151,9 +143,6 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         text-decoration: underline; 
       }
       
-      /* -------------------------------------
-          BUTTONS
-      ------------------------------------- */
       .btn {
         box-sizing: border-box;
         width: 100%; }
@@ -194,9 +183,7 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         color: #ffffff; 
       }
       
-      /* -------------------------------------
-          OTHER STYLES THAT MIGHT BE USEFUL
-      ------------------------------------- */
+  
       .last {
         margin-bottom: 0; 
       }
@@ -242,19 +229,12 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         width: 0; 
       }
       
-      .powered-by a {
-        text-decoration: none; 
-      }
-      
       hr {
         border: 0;
         border-bottom: 1px solid #f6f6f6;
         Margin: 20px 0; 
       }
       
-      /* -------------------------------------
-          RESPONSIVE AND MOBILE FRIENDLY STYLES
-      ------------------------------------- */
       @media only screen and (max-width: 620px) {
         table[class=body] h1 {
           font-size: 28px !important;
@@ -297,9 +277,6 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
         }
       }
       
-      /* -------------------------------------
-          PRESERVE THESE STYLES IN THE HEAD
-      ------------------------------------- */
       @media all {
         .ExternalClass {
           width: 100%; 
@@ -361,9 +338,9 @@ userRouter.post('/send-confirmation-email', async (req, res) => {
                     <tr>
                       <td>
                         <p> Hey ${fullName}</p>
-                        <p> Great News! Your account request to access Zoho Ticket Portal is approved. </p>
+                        <p> Great News! Your request to access Zoho Ticket Portal is approved. </p>
                         <p> Now, you can go ahead and login by clicking on the below button </p>
-                        <p> Happy Browsing </p>
+                        <p> Happy Browsing! </p>
                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                           <tbody>
                             <tr>
