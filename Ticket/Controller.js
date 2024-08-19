@@ -729,15 +729,14 @@ async function UpdateTicketTime() {
 
 
   try {
-    const OpenTicketData = await TicketSchema.find({ status: { $in: statuses }, ticket_id: "5915" });
+    const OpenTicketData = await TicketSchema.find({ status: { $in: statuses } });
     const accessToken = await getRefreshToken();
     const apiCallTime = new Date();
     const pLimit = await import('p-limit').then(mod => mod.default);
     const limit = pLimit(25);
-    // ${ticket.ticket_long_id}
     const fetchData = async (ticket) => {
       try {
-        const ticketData = await axios.get(`https://desk.zoho.com/api/v1/tickets/832118000053776785`, {
+        const ticketData = await axios.get(`https://desk.zoho.com/api/v1/tickets/${ticket.ticket_long_id}`, {
           headers: {
             "Content-Type": "application/json",
             accept: "application/json",
@@ -745,8 +744,7 @@ async function UpdateTicketTime() {
           },
         });
         const data = ticketData.data;
-        // data.ticketNumber
-        const currentTicket = await TicketSchema.findOne({ ticket_id: "5915" });
+        const currentTicket = await TicketSchema.findOne({ ticket_id: data.ticketNumber });
         const lastSupportTotalTime = currentTicket?.department_history[0]?.total_time
         const lastSupportStartTime = currentTicket?.department_history[0]?.start_time
         const lastSupportEndTime = currentTicket?.department_history[0]?.end_time
@@ -926,7 +924,7 @@ const newEqEndTime = data.layoutDetails.layoutName === "Evaluation Questions" &&
 const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
        
         const updateSupportResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915" , "department_history.department": "Support" },
+          { ticket_id: data.ticketNumber , "department_history.department": "Support" },
           {
             $set: {
               "department_history.$.start_time": newSupportStartTime,
@@ -938,7 +936,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
         );
 
         const updatePSResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915", "department_history.department": "Professional Services" },
+          { ticket_id: data.ticketNumber, "department_history.department": "Professional Services" },
           {
             $set: {
               "department_history.$.start_time": newPSStartTime,
@@ -949,7 +947,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
           { new: true }
         );
         const updateProductResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915", "department_history.department": "Product" },
+          { ticket_id: data.ticketNumber, "department_history.department": "Product" },
           {
             $set: {
               "department_history.$.start_time": newProductStartTime,
@@ -960,7 +958,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
           { new: true }
         );
         const updateEngineeringResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915", "department_history.department": "Engineering" },
+          { ticket_id: data.ticketNumber, "department_history.department": "Engineering" },
           {
             $set: {
               "department_history.$.start_time": newEngineeringStartTime,
@@ -972,7 +970,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
         );
 
         const updateDevopsResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915", "department_history.department": "Devops" },
+          { ticket_id: data.ticketNumber, "department_history.department": "Devops" },
           {
             $set: {
               "department_history.$.start_time": newDevopsStartTime,
@@ -984,7 +982,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
         );
 
         const updateEqResult = await TicketSchema.findOneAndUpdate(
-          { ticket_id: "5915" , "department_history.department": "Evaluation Questions" },
+          { ticket_id: data.ticketNumber , "department_history.department": "Evaluation Questions" },
           {
             $set: {
               "department_history.$.start_time": newEqStartTime,
