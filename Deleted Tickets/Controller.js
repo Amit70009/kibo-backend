@@ -34,7 +34,27 @@ try {
     const accessToken = await getRefreshToken();
     const allDeletedData = []
 
-    const DeleteAPI = await axios.get(` https://desk.zoho.com/api/v1/recycleBin?module=tickets&limit=100&sortBy=-deletedTime`)
+    const DeleteAPI = await axios.get(` https://desk.zoho.com/api/v1/recycleBin?module=tickets&limit=100&sortBy=-deletedTime`,{
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    // console.log(DeleteAPI.data.data);
+    allDeletedData.push(...DeleteAPI.data.data)
+
+    const ticketIds = allDeletedData.map(ticket => ticket.id);
+   
+    const Delete = await TicketSchema.deleteMany({
+      ticket_long_id: { $in: ticketIds }
+    })
+
+    return {
+      status: 200,
+      message: "Tickets Deleted Successfully",
+      data: {Delete}
+    }
 } catch (error) {
     throw error
 }

@@ -1,5 +1,6 @@
 const axios = require("axios");
 const moment = require('moment');
+const { intervalToDuration, parseISO } = require('date-fns');
 const { get } = require("./Routes.js");
 const TicketSchema = require("../Ticket/Model.js").ticketModel;
 
@@ -40,7 +41,6 @@ async function Ticket(dataFromExternalSource) {
     let agentResponse = [];
     let page = 1;
     let hasMoreAgentData = true;
-    const batchSize = 20
     const allData = [];
   
       const externalData = await axios.get(
@@ -88,7 +88,7 @@ async function Ticket(dataFromExternalSource) {
 
     const ticketDataPromises = allData?.map(async (ticket) => {
       const existingTicket = await TicketSchema.findOne({
-        ticket_id: ticket.ticketNumber,
+        ticket_id: ticket.ticket_id,
       });
 
       // console.log(existingTicket.ticket_id);
@@ -115,18 +115,6 @@ async function Ticket(dataFromExternalSource) {
       )
 
       let accountData;
-
-    //   if(specificData.data.departmentId) {
-    //     departmentId = await axios.get(`https://desk.zoho.com/api/v1/departments/${specificData.data.departmentId}`,
-    //     {
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         accept: "application/json",
-    //         Authorization: `Bearer ${accessToken}`,
-    //       },
-    //     }
-    //   );
-    // } 
 
       if (specificData.data.accountId) {
       accountData = await axios.get(
@@ -253,7 +241,201 @@ const FRT = timeInMinutes < thresholdInMinutes ? "Within SLA" : "Out of SLA";
             issue_sub_type: specificData.data.cf.cf_issue_sub_type_d2 ? specificData.data.cf.cf_issue_sub_type_d2 : 'null',
             jira_id: specificData.data.cf.cf_jira_issue_id ? specificData.data.cf.cf_jira_issue_id : 'null',
             resolution_owner: specificData.data.cf.cf_resolution_owner_1 ? specificData.data.cf.cf_resolution_owner_1 : 'null',
-          }
+          },
+          department_history: [
+            {
+              department: "Support",
+              start_time: specificData.data.layoutDetails.layoutName === "Support" && 
+                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                          ? specificData.data.createdTime 
+                          : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Support"
+                             ? specificData.data.cf.cf_department_transfer_time_1 
+                             : apiCallTime.toISOString()),
+              
+              end_time: specificData.data.layoutDetails.layoutName === "Support" && 
+                        specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                        ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                           specificData.data.cf.cf_department_transfer_time_1 == undefined
+                           ? apiCallTime.toISOString()
+                           : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                        : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+            
+total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Support" && 
+  specificData.data.cf.cf_department_transfer_time_1 == null && 
+  specificData.data.cf.cf_department_transfer_time_1 == undefined 
+  ? specificData.data.createdTime 
+  : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Support"
+     ? specificData.data.cf.cf_department_transfer_time_1 
+     : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Support" && 
+     specificData.data.closedTime == null && specificData.data.closedTime == undefined
+     ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+        specificData.data.cf.cf_department_transfer_time_1 == undefined
+        ? apiCallTime.toISOString()
+        : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+     : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+                      },
+            {
+              department: "Professional Services",
+              start_time: specificData.data.layoutDetails.layoutName === "Professional Services" && 
+                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                          ? specificData.data.createdTime 
+                          : (specificData.data.cf.cf_department_transfer_time_1 !== null &&  specificData.data.layoutDetails.layoutName === "Professional Services"
+                             ? specificData.data.cf.cf_department_transfer_time_1 
+                             : apiCallTime.toISOString()),
+              
+              end_time: specificData.data.layoutDetails.layoutName === "Professional Services" && 
+              specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                        ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? apiCallTime.toISOString()
+                          : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                           : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+            
+            total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Professional Services" && 
+              specificData.data.cf.cf_department_transfer_time_1 == null && 
+              specificData.data.cf.cf_department_transfer_time_1 == undefined 
+              ? specificData.data.createdTime 
+              : (specificData.data.cf.cf_department_transfer_time_1 !== null &&  specificData.data.layoutDetails.layoutName === "Professional Services"
+                 ? specificData.data.cf.cf_department_transfer_time_1 
+                 : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Professional Services" && 
+                 specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                           ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                             specificData.data.cf.cf_department_transfer_time_1 == undefined
+                             ? apiCallTime.toISOString()
+                             : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                              : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+                          },
+            {
+              department: "Engineering",
+              start_time: specificData.data.layoutDetails.layoutName === "Engineering" && 
+                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                          ? specificData.data.createdTime 
+                          : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Engineering"
+                             ? specificData.data.cf.cf_department_transfer_time_1 
+                             : apiCallTime.toISOString()),
+              
+              end_time: specificData.data.layoutDetails.layoutName === "Engineering" && 
+              specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                        ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? apiCallTime.toISOString()
+                          : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                           : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+
+                           total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Engineering" && 
+                            specificData.data.cf.cf_department_transfer_time_1 == null && 
+                            specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                            ? specificData.data.createdTime 
+                            : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Engineering"
+                               ? specificData.data.cf.cf_department_transfer_time_1 
+                               : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Engineering" && 
+                               specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                                         ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                                           specificData.data.cf.cf_department_transfer_time_1 == undefined
+                                           ? apiCallTime.toISOString()
+                                           : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                                            : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+            },
+            {
+              department: "Product",
+              start_time: specificData.data.layoutDetails.layoutName === "Product" && 
+                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? specificData.data.createdTime 
+                          : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Product"
+                             ? specificData.data.cf.cf_department_transfer_time_1 
+                             : apiCallTime.toISOString()),
+              
+              end_time: specificData.data.layoutDetails.layoutName === "Product" && 
+              specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                        ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? apiCallTime.toISOString()
+                          : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                           : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+            
+            total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Product" && 
+              specificData.data.cf.cf_department_transfer_time_1 == null && 
+              specificData.data.cf.cf_department_transfer_time_1 == undefined
+              ? specificData.data.createdTime 
+              : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Product"
+                 ? specificData.data.cf.cf_department_transfer_time_1 
+                 : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Product" && 
+                 specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                           ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                             specificData.data.cf.cf_department_transfer_time_1 == undefined
+                             ? apiCallTime.toISOString()
+                             : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                              : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+                          },
+            {
+              department: "Devops",
+              start_time: specificData.data.layoutDetails.layoutName === "Devops" && 
+                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? specificData.data.createdTime 
+                          : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Devops"
+                             ? specificData.data.cf.cf_department_transfer_time_1 
+                             : apiCallTime.toISOString()),
+              
+              end_time: specificData.data.layoutDetails.layoutName === "Devops" && 
+              specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                        ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                          specificData.data.cf.cf_department_transfer_time_1 == undefined
+                          ? apiCallTime.toISOString()
+                          : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                           : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+            
+            total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Devops" && 
+              specificData.data.cf.cf_department_transfer_time_1 == null && 
+              specificData.data.cf.cf_department_transfer_time_1 == undefined
+              ? specificData.data.createdTime 
+              : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Devops"
+                 ? specificData.data.cf.cf_department_transfer_time_1 
+                 : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Devops" && 
+                 specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                           ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                             specificData.data.cf.cf_department_transfer_time_1 == undefined
+                             ? apiCallTime.toISOString()
+                             : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                              : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+                          },
+                          {
+                            department: "Evaluation Questions",
+                            start_time: specificData.data.layoutDetails.layoutName === "Evaluation Questions" && 
+                                        specificData.data.cf.cf_department_transfer_time_1 == null && 
+                                        specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                                        ? specificData.data.createdTime 
+                                        : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Evaluation Questions"
+                                           ? specificData.data.cf.cf_department_transfer_time_1 
+                                           : apiCallTime.toISOString()),
+                            
+                            end_time: specificData.data.layoutDetails.layoutName === "Evaluation Questions" && 
+                            specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                                      ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                                        specificData.data.cf.cf_department_transfer_time_1 == undefined
+                                        ? apiCallTime.toISOString()
+                                        : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                                         : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime),
+              
+                                         total_time: intervalToDuration({start: specificData.data.layoutDetails.layoutName === "Evaluation Questions" && 
+                                          specificData.data.cf.cf_department_transfer_time_1 == null && 
+                                          specificData.data.cf.cf_department_transfer_time_1 == undefined 
+                                          ? specificData.data.createdTime 
+                                          : (specificData.data.cf.cf_department_transfer_time_1 !== null && specificData.data.layoutDetails.layoutName === "Evaluation Questions"
+                                             ? specificData.data.cf.cf_department_transfer_time_1 
+                                             : apiCallTime.toISOString()), end: specificData.data.layoutDetails.layoutName === "Evaluation Questions" && 
+                                             specificData.data.closedTime == null && specificData.data.closedTime == undefined
+                                                       ? (specificData.data.cf.cf_department_transfer_time_1 == null && 
+                                                         specificData.data.cf.cf_department_transfer_time_1 == undefined
+                                                         ? apiCallTime.toISOString()
+                                                         : (specificData.data.cf.cf_department_transfer_time_1 > apiCallTime ? specificData.data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+                                                          : (specificData.data.closedTime == null && specificData.data.closedTime == undefined ? apiCallTime.toISOString() : specificData.data.closedTime)})
+                          },
+          ]          
         });
       } else {     
         const accountId = ticket.assigneeId;
@@ -325,6 +507,7 @@ async function GetAllData(data) {
   try {
       const {
           start_date,
+          ticket_id,
           end_date,
           resolved_start_date,
           resolved_end_date,
@@ -382,6 +565,11 @@ async function GetAllData(data) {
           query.severity = { $in: ticketSeverity };
       }
 
+      if (ticket_id) {
+        const ticket_ID = ticket_id.split(',').map(id => id.trim());
+        query.ticket_id = { $in: ticket_ID };
+    }
+
       if (is_ticket_archieved !== 'all') {
           if (is_ticket_archieved !== undefined) {
               query.is_ticket_archieved = is_ticket_archieved; // Apply the filter if provided and not 'all'
@@ -417,7 +605,7 @@ try {
   );
 
   const data = agentsResponse.data
-console.log(agentsResponse.data.length);
+
   if(agentsResponse){
     
     return{
@@ -490,4 +678,334 @@ async function FetchAllClient() {
   }
 }
 
-module.exports = {Ticket, GetAllData, AccountName, AgentName, FetchAllAgent, FetchAllClient};
+async function UpdateTicketTime() {
+  const statuses = ["Unassigned", "Pending Client", "Escalated", "Unassigned", "Engineering", 
+    "Product", "Accepted", "Assigned", "PSE", "Pending Review", 
+    "Pending Contract", "Pending Client/Partner", "Waiting for Code Change", 
+    "Pending Prioritization", "With Agent"];
+
+ // Function to add durations and normalize
+ function addDurations(duration1 = {}, duration2 = {}) {
+  // Convert durations to total seconds
+  const toSeconds = (duration) => {
+    return (duration.years || 0) * 31536000 + 
+           (duration.months || 0) * 2592000 + 
+           (duration.days || 0) * 86400 +     
+           (duration.hours || 0) * 3600 +     
+           (duration.minutes || 0) * 60 +   
+           (duration.seconds || 0);        
+  };
+
+  // Normalize a duration object
+  function normalizeDuration(totalSeconds) {
+    const years = Math.floor(totalSeconds / 31536000);
+    totalSeconds %= 31536000;
+    
+    const months = Math.floor(totalSeconds / 2592000);
+    totalSeconds %= 2592000;
+    
+    const days = Math.floor(totalSeconds / 86400);
+    totalSeconds %= 86400;
+    
+    const hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    return { years, months, days, hours, minutes, seconds };
+  }
+
+  // Calculate total seconds for both durations
+  const totalSeconds1 = toSeconds(duration1);
+  const totalSeconds2 = toSeconds(duration2);
+
+  // Sum the total seconds
+  const totalSeconds = totalSeconds1 + totalSeconds2;
+
+  // Normalize the result
+  return normalizeDuration(totalSeconds);
+}
+
+
+  try {
+    const OpenTicketData = await TicketSchema.find({ status: { $in: statuses }, ticket_id: "5915" });
+    const accessToken = await getRefreshToken();
+    const apiCallTime = new Date();
+    const pLimit = await import('p-limit').then(mod => mod.default);
+    const limit = pLimit(25);
+    // ${ticket.ticket_long_id}
+    const fetchData = async (ticket) => {
+      try {
+        const ticketData = await axios.get(`https://desk.zoho.com/api/v1/tickets/832118000053776785`, {
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const data = ticketData.data;
+        // data.ticketNumber
+        const currentTicket = await TicketSchema.findOne({ ticket_id: "5915" });
+        const lastSupportTotalTime = currentTicket?.department_history[0]?.total_time
+        const lastSupportStartTime = currentTicket?.department_history[0]?.start_time
+        const lastSupportEndTime = currentTicket?.department_history[0]?.end_time
+        const lastPSTotalTime = currentTicket?.department_history[1]?.total_time
+        const lastPSStartTime = currentTicket?.department_history[1]?.start_time
+        const lastPSEndTime = currentTicket?.department_history[1]?.end_time
+        const lastEngineeringTotalTime = currentTicket?.department_history[2]?.total_time
+        const lastEngineeringStartTime = currentTicket?.department_history[2]?.start_time
+        const lastEngineeringEndTime = currentTicket?.department_history[2]?.end_time
+        const lastProductTotalTime = currentTicket?.department_history[3]?.total_time
+        const lastProductStartTime = currentTicket?.department_history[3]?.start_time
+        const lastProductEndTime = currentTicket?.department_history[3]?.end_time
+        const lastDevopsTotalTime = currentTicket?.department_history[4]?.total_time
+        const lastDevopsStartTime = currentTicket?.department_history[4]?.start_time
+        const lastDevopsEndTime = currentTicket?.department_history[4]?.end_time
+        const lastEqTotalTime = currentTicket?.department_history[5]?.total_time
+        const lastEqStartTime = currentTicket?.department_history[5]?.start_time
+        const lastEqEndTime = currentTicket?.department_history[5]?.end_time
+
+        const newSupportStartTime = data.layoutDetails.layoutName === "Support" && 
+          (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+          ? data.createdTime 
+          : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Support"
+             ? data.cf.cf_department_transfer_time_1 
+             : apiCallTime.toISOString());
+
+        const newSupportEndTime = data.layoutDetails.layoutName === "Support" && 
+          (data.closedTime == null || data.closedTime === undefined)
+          ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+             ? apiCallTime.toISOString()
+             : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+          : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+        const CalculateSupStartTime = (newSupportStartTime == lastSupportStartTime) ? lastSupportEndTime : (newSupportStartTime == newSupportEndTime ? newSupportEndTime : data.cf.cf_department_transfer_time_1)
+        const CalculateSupEndTime = data.layoutDetails.layoutName != "Support" ? data.cf.cf_department_transfer_time_1 : newSupportEndTime
+        const newSupportDifference = data.layoutDetails.layoutName == "Support"  ? intervalToDuration({
+          start: new Date(CalculateSupStartTime),
+          end: new Date(newSupportEndTime)
+        }) : ( CalculateSupEndTime > lastSupportEndTime && lastSupportEndTime == CalculateSupEndTime? intervalToDuration({
+          start: new Date(lastSupportEndTime),
+          end: new Date(CalculateSupEndTime)
+        }) : {})
+
+        const updatedSupTotalTime = addDurations(lastSupportTotalTime, newSupportDifference);
+       
+        const newPSStartTime = data.layoutDetails.layoutName === "Professional Services" && 
+          (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+          ? data.createdTime 
+          : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Professional Services"
+             ? data.cf.cf_department_transfer_time_1 
+             : apiCallTime.toISOString());
+
+
+        const newPSEndTime = data.layoutDetails.layoutName === "Professional Services" && 
+          (data.closedTime == null || data.closedTime === undefined)
+          ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+             ? apiCallTime.toISOString()
+             : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+          : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+        // Calculate the new difference
+        const CalculatePSStartTime = (newPSStartTime == lastPSStartTime) ? lastPSEndTime : (newPSStartTime == newPSEndTime ? newPSEndTime : data.cf.cf_department_transfer_time_1)
+        const CalculatePSEndTime = data.layoutDetails.layoutName != "Professional Services" ? data.cf.cf_department_transfer_time_1 : newPSEndTime
+        const newPSDifference = data.layoutDetails.layoutName == "Professional Services"  ? intervalToDuration({
+          start: new Date(CalculatePSStartTime),
+          end: new Date(newPSEndTime)
+        }) : ( CalculatePSEndTime > lastPSEndTime && lastPSEndTime == CalculatePSEndTime? intervalToDuration({
+          start: new Date(lastPSEndTime),
+          end: new Date(CalculatePSEndTime)
+        }) : {})
+
+        const updatedPSETotalTime = addDurations(lastPSTotalTime, newPSDifference )
+
+        const newEngineeringStartTime = data.layoutDetails.layoutName === "Engineering" && 
+        (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+        ? data.createdTime 
+        : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Engineering"
+           ? data.cf.cf_department_transfer_time_1 
+           : apiCallTime.toISOString());
+
+      const newEngineeringEndTime = data.layoutDetails.layoutName === "Engineering" && 
+        (data.closedTime == null || data.closedTime === undefined)
+        ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+           ? apiCallTime.toISOString()
+           : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+        : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+        const CalculateEngineeringStartTime = (newEngineeringStartTime == lastEngineeringStartTime) ? lastEngineeringEndTime : (newEngineeringStartTime == newEngineeringEndTime ? newEngineeringEndTime : data.cf.cf_department_transfer_time_1)
+        const CalculateEngineeringEndTime = data.layoutDetails.layoutName != "Engineering" ? data.cf.cf_department_transfer_time_1 : newEngineeringEndTime
+        const newEngineeringDifference = data.layoutDetails.layoutName == "Engineering"  ? intervalToDuration({
+          start: new Date(CalculateEngineeringStartTime),
+          end: new Date(newEngineeringEndTime)
+        }) : ( CalculateEngineeringEndTime > lastEngineeringEndTime && lastEngineeringEndTime == CalculateEngineeringEndTime ? intervalToDuration({
+          start: new Date(lastEngineeringEndTime),
+          end: new Date(CalculateEngineeringEndTime)
+        }) : {})
+
+      const updatedEngineeringTotalTime = addDurations(lastEngineeringTotalTime, newEngineeringDifference);
+
+      const newDevopsStartTime = data.layoutDetails.layoutName === "Devops" && 
+      (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+      ? data.createdTime 
+      : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Devops"
+         ? data.cf.cf_department_transfer_time_1 
+         : apiCallTime.toISOString());
+
+    const newDevopsEndTime = data.layoutDetails.layoutName === "Devops" && 
+      (data.closedTime == null || data.closedTime === undefined)
+      ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+         ? apiCallTime.toISOString()
+         : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+      : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+      const CalculateDevopsStartTime = (newDevopsStartTime == lastDevopsStartTime) ? lastDevopsEndTime : (newDevopsStartTime == newDevopsEndTime ? newDevopsEndTime : data.cf.cf_department_transfer_time_1)
+      const CalculateDevopsEndTime = data.layoutDetails.layoutName != "Devops" ? data.cf.cf_department_transfer_time_1 : newDevopsEndTime
+      const newDevopsDifference = data.layoutDetails.layoutName == "Devops"  ? intervalToDuration({
+        start: new Date(CalculateDevopsStartTime),
+        end: new Date(newDevopsEndTime)
+      }) : ( CalculateDevopsEndTime > lastDevopsEndTime && lastDevopsEndTime == CalculateDevopsEndTime ? intervalToDuration({
+        start: new Date(lastDevopsEndTime),
+        end: new Date(CalculateDevopsEndTime)
+      }) : {})
+
+    const updatedDevopsTotalTime = addDurations(lastDevopsTotalTime, newDevopsDifference);
+
+    const newProductStartTime = data.layoutDetails.layoutName === "Product" && 
+    (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+    ? data.createdTime 
+    : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Product"
+       ? data.cf.cf_department_transfer_time_1 
+       : apiCallTime.toISOString());
+
+  const newProductEndTime = data.layoutDetails.layoutName === "Product" && 
+    (data.closedTime == null || data.closedTime === undefined)
+    ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+       ? apiCallTime.toISOString()
+       : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+    : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+    const CalculateProductStartTime = (newProductStartTime == lastProductStartTime) ? lastProductEndTime : (newProductStartTime == newProductEndTime ? newProductEndTime : data.cf.cf_department_transfer_time_1)
+    const CalculateProductEndTime = data.layoutDetails.layoutName != "Product" ? data.cf.cf_department_transfer_time_1 : newProductEndTime
+    const newProductDifference = data.layoutDetails.layoutName == "Product"  ? intervalToDuration({
+      start: new Date(CalculateProductStartTime),
+      end: new Date(newProductEndTime)
+    }) : ( CalculateProductEndTime > lastProductEndTime && lastProductEndTime == CalculateProductEndTime ? intervalToDuration({
+      start: new Date(lastProductEndTime),
+      end: new Date(CalculateProductEndTime)
+    }) : {})
+
+  const updatedProductTotalTime = addDurations(lastProductTotalTime, newProductDifference);
+
+  const newEqStartTime = data.layoutDetails.layoutName === "Evaluation Questions" && 
+  (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined) 
+  ? data.createdTime 
+  : (data.cf.cf_department_transfer_time_1 !== null && data.layoutDetails.layoutName === "Evaluation Questions"
+     ? data.cf.cf_department_transfer_time_1 
+     : apiCallTime.toISOString());
+
+const newEqEndTime = data.layoutDetails.layoutName === "Evaluation Questions" && 
+  (data.closedTime == null || data.closedTime === undefined)
+  ? (data.cf.cf_department_transfer_time_1 == null || data.cf.cf_department_transfer_time_1 === undefined
+     ? apiCallTime.toISOString()
+     : (data.cf.cf_department_transfer_time_1 > apiCallTime ? data.cf.cf_department_transfer_time_1 : apiCallTime.toISOString()))
+  : (data.closedTime == null || data.closedTime === undefined ? apiCallTime.toISOString() : data.closedTime);
+
+  const CalculateEqStartTime = (newEqStartTime == lastEqStartTime) ? lastEqEndTime : (newEqStartTime == newEqEndTime ? newEqEndTime : data.cf.cf_department_transfer_time_1)
+  const CalculateEqEndTime = data.layoutDetails.layoutName != "Evaluation Questions" ? data.cf.cf_department_transfer_time_1 : newEqEndTime
+  const newEqDifference = data.layoutDetails.layoutName == "Evaluation Questions"  ? intervalToDuration({
+    start: new Date(CalculateEqStartTime),
+    end: new Date(newEqEndTime)
+  }) : ( CalculateEqEndTime > lastEqEndTime && lastEqEndTime == CalculateEqEndTime ? intervalToDuration({
+    start: new Date(lastEqEndTime),
+    end: new Date(CalculateEqEndTime)
+  }) : {})
+
+
+const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
+       
+        const updateSupportResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915" , "department_history.department": "Support" },
+          {
+            $set: {
+              "department_history.$.start_time": newSupportStartTime,
+              "department_history.$.end_time": newSupportEndTime,
+              "department_history.$.total_time": updatedSupTotalTime
+            }
+          },
+          { new: true }
+        );
+
+        const updatePSResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915", "department_history.department": "Professional Services" },
+          {
+            $set: {
+              "department_history.$.start_time": newPSStartTime,
+              "department_history.$.end_time": newPSEndTime,
+              "department_history.$.total_time": updatedPSETotalTime
+            }
+          },
+          { new: true }
+        );
+        const updateProductResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915", "department_history.department": "Product" },
+          {
+            $set: {
+              "department_history.$.start_time": newProductStartTime,
+              "department_history.$.end_time": newProductEndTime,
+              "department_history.$.total_time": updatedProductTotalTime
+            }
+          },
+          { new: true }
+        );
+        const updateEngineeringResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915", "department_history.department": "Engineering" },
+          {
+            $set: {
+              "department_history.$.start_time": newEngineeringStartTime,
+              "department_history.$.end_time": newEngineeringEndTime,
+              "department_history.$.total_time": updatedEngineeringTotalTime
+            }
+          },
+          { new: true }
+        );
+
+        const updateDevopsResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915", "department_history.department": "Devops" },
+          {
+            $set: {
+              "department_history.$.start_time": newDevopsStartTime,
+              "department_history.$.end_time": newDevopsEndTime,
+              "department_history.$.total_time": updatedDevopsTotalTime
+            }
+          },
+          { new: true }
+        );
+
+        const updateEqResult = await TicketSchema.findOneAndUpdate(
+          { ticket_id: "5915" , "department_history.department": "Evaluation Questions" },
+          {
+            $set: {
+              "department_history.$.start_time": newEqStartTime,
+              "department_history.$.end_time": newEqEndTime,
+              "department_history.$.total_time": updatedEqTotalTime
+            }
+          },
+          { new: true }
+        );
+      } catch (error) {
+        console.error(`Error fetching data for ticket ${ticket.ticket_long_id}:`, error);
+      }
+    };
+
+    const tasks = OpenTicketData.map(ticket => limit(() => fetchData(ticket)));
+    await Promise.all(tasks);
+
+  } catch (error) {
+    console.error('Error updating ticket time:', error);
+  }
+}
+
+
+module.exports = {Ticket, GetAllData, AccountName, AgentName, FetchAllAgent, FetchAllClient, UpdateTicketTime};

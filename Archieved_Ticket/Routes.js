@@ -8,9 +8,6 @@ userRouter.post("/archieved-ticket", async (req, res) => {
     var callLoginMethod = await UserController.archivedTickets();
     res.send({
       status: "Done"
-        // status: callLoginMethod.status,
-        // message: callLoginMethod.message,
-        // data: callLoginMethod.data
     })
 })
 

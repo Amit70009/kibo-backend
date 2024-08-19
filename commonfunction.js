@@ -1,4 +1,5 @@
 var mongoUrl = "mongodb+srv://amitvarshney30:BMqeviKBTCrm55Dz@cluster0.jhz6nca.mongodb.net/?retryWrites=true&w=majority"; // Paste cloud mongo url
+// var mongoUrl = "mongodb+srv://amitvarshney30:Flash123@kibo-sandbox.t0rpqfm.mongodb.net/?retryWrites=true&w=majority&appName=kibo-sandbox"
 var portNo = 7384;
 var bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");

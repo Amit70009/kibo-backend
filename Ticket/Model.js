@@ -40,8 +40,17 @@ custom_data: {
     issue_sub_type: {type: String},
     jira_id: {type: String},
     resolution_owner: {type: String},
-
-}
+},
+department_history: [
+    {
+      department: String,
+      start_time: String,
+      end_time: String,
+      total_time: Object // Time in minutes
+    },
+    { _id: false },
+    {__v: false}
+  ],
 });
 var ticketModel = mongoose.model("ticket", ticketSchema);
 

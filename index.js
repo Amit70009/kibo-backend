@@ -22,13 +22,19 @@ var SendRejectionEmail = require("./Email Data/sendDeniedEmail")
 var Token = require("./Login Function/tokengenerate");
 var createArchTicket = require("./Archieved_Ticket/CreateRoute");
 var validateOTP = require("./Email Data/VerifyOTP")
+var DeleteTicket = require("./Deleted Tickets/Route")
+var UpdateTicketTime = require("./Ticket/UpdateTime")
 var serverless = require("serverless-http");
 const fetchAllUser = require('./Fetch Function/fetchAllUser');
 const deleteUser = require('./Delete Function/deleteuser');
 const searchTicketbynumber = require('./Search Ticket/numberRoute');
 const searchTicketbyID = require('./Search Ticket/idRoute');
-const ticketUpdate = require("./Update Ticket/updateRoute")
-
+const ticketUpdate = require("./Update Ticket/updateRoute");
+const feedbackCreate = require('./Feedback/Routes');
+const FetchAllFeedback = require('./Feedback/AllFeedbackFetch');
+const FetchFeedback = require('./Feedback/FeedbackFetch')
+const DeleteFeedback = require("./Feedback/DeleteFeedback");
+const UpdateFeedback = require('./Feedback/UpdateFeedback');
 
 app.use(cors({
   "Access-Control-Allow-Origin": "*",
@@ -79,6 +85,13 @@ app.use("/api/v1/users", searchTicketbyID);
 app.use("/api/v1/users", ticketUpdate);
 app.use("/api/v1/users", SendConfirmationEmail);
 app.use("/api/v1/users", SendRejectionEmail);
+app.use("/api/v1/users", DeleteTicket);
+app.use("/api/v1/users", UpdateTicketTime)
+app.use("/api/v1/users", feedbackCreate)
+app.use("/api/v1/users", FetchAllFeedback)
+app.use("/api/v1/users", FetchFeedback)
+app.use("/api/v1/users", DeleteFeedback)
+app.use("/api/v1/users", UpdateFeedback)
 
 app.listen(Constant.portNo, async (error, conn) => {
   if(error){
