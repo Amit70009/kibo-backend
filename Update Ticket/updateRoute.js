@@ -7,9 +7,9 @@ userRouter.put("/update-ticket", async (req, res) => {
     const data = req.body
     var updateTicket = await UserController.updateTicket(data);
     res.send({
-    //    message: "done"
-        status: updateTicket.status,
-        message: updateTicket.message,
+       message: "done"
+        // status: updateTicket.status,
+        // message: updateTicket.message,
         // totalTicket: searchByNumber.ticket,
         // data: updateTicket.data
     })

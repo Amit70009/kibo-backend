@@ -736,7 +736,7 @@ async function UpdateTicketTime() {
     const limit = pLimit(25);
     const fetchData = async (ticket) => {
       try {
-        const ticketData = await axios.get(`https://desk.zoho.com/api/v1/tickets/${ticket.ticket_long_id}`, {
+          const ticketData = await axios.get(`https://desk.zoho.com/api/v1/tickets/${ticket.ticket_long_id}`, {
           headers: {
             "Content-Type": "application/json",
             accept: "application/json",
@@ -932,7 +932,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedSupTotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
 
         const updatePSResult = await TicketSchema.findOneAndUpdate(
@@ -944,7 +944,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedPSETotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
         const updateProductResult = await TicketSchema.findOneAndUpdate(
           { ticket_id: data.ticketNumber, "department_history.department": "Product" },
@@ -955,7 +955,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedProductTotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
         const updateEngineeringResult = await TicketSchema.findOneAndUpdate(
           { ticket_id: data.ticketNumber, "department_history.department": "Engineering" },
@@ -966,7 +966,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedEngineeringTotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
 
         const updateDevopsResult = await TicketSchema.findOneAndUpdate(
@@ -978,7 +978,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedDevopsTotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
 
         const updateEqResult = await TicketSchema.findOneAndUpdate(
@@ -990,7 +990,7 @@ const updatedEqTotalTime = addDurations(lastEqTotalTime, newEqDifference);
               "department_history.$.total_time": updatedEqTotalTime
             }
           },
-          { new: true }
+          { new: true, upsert: false }
         );
       } catch (error) {
         console.error(`Error fetching data for ticket ${ticket.ticket_long_id}:`, error);
