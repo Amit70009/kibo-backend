@@ -88,10 +88,8 @@ async function Ticket(dataFromExternalSource) {
 
     const ticketDataPromises = allData?.map(async (ticket) => {
       const existingTicket = await TicketSchema.findOne({
-        ticket_id: ticket.ticket_id,
+        ticket_id: ticket.ticketNumber,
       });
-
-      // console.log(existingTicket.ticket_id);
 
       const specificData = await axios.get(
         `https://desk.zoho.com/api/v1/tickets/${ticket.id}`,
